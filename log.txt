@@ -1,0 +1,7 @@
+2012/11/03 13:26:29 Loaded new config.
+2012/11/03 13:26:37 Got update info: {false ppt false} <nil>
+2012/11/03 13:26:48 Got update info: {false ppt false} <nil>
+2012/11/03 13:26:58 Got update info: {false ppt false} <nil>
+2012/11/03 13:27:09 Got update info: {false ppt false} <nil>
+2012/11/03 13:27:19 Got update info: {false ppt false} <nil>
+2012/11/03 13:27:29 Got update info: {false ppt false} <nil>
