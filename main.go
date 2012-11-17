@@ -58,6 +58,7 @@ func startScreenMgr(c config.Config) chan bool {
 						err = control.StartPresentation(c.PowerPoint, broadcast)
 						if err != nil {
 							c.Log.Println("Could not start presentation: ", err)
+							util.Sleep(20)
 							continue
 						}
 						presentationOn = true
