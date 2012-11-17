@@ -1,0 +1,19 @@
+{
+	"StandardTimeSettings": {
+		"TurnOn": "07:00",
+		"TurnOff": "15:30"
+	},
+	"OverrideDays": {
+		"2012-10-7": {
+			"TurnOn": "08:30",
+			"TurnOff": "12:30"
+		},
+		"2013-1-19": {
+			"TurnOn": "08:30",
+			"TurnOff": "12:30"
+		}
+	},
+	"OverrideOn": false,
+	"OverrideOff": false,
+	"updateInterval": 10
+}

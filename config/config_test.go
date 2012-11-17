@@ -11,7 +11,7 @@ var tz, _ = time.LoadLocation("UTC")
 
 func init() {
 	var err error
-	conf, err = config.Get("config.json")
+	conf, err = config.Get("./config.json")
 	if err != nil {
 		panic(err)
 	}
