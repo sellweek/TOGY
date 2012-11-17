@@ -8,6 +8,7 @@ import (
 )
 
 const configPath = "config.json"
+
 var presentationOn = false
 
 func main() {
@@ -32,12 +33,10 @@ func main() {
 		}
 		conf.Log.Println("Loaded new config.")
 
-		scrExit<- true
+		scrExit <- true
 	}
 
-
 }
-
 
 func startScreenMgr(c config.Config) chan bool {
 	exitChan := make(chan bool)
@@ -63,11 +62,12 @@ func startScreenMgr(c config.Config) chan bool {
 						}
 						presentationOn = true
 					}
-					
+
 					err := control.TurnScreenOn()
 					if err != nil {
 						c.Log.Println("Could not turn screen on: ", err)
 					}
+					c.Log.Println("The screen is on")
 
 				} else {
 					err := control.TurnScreenOff()
@@ -79,6 +79,7 @@ func startScreenMgr(c config.Config) chan bool {
 						control.KillPresentation()
 						presentationOn = false
 					}
+					c.Log.Println("The screen is off")
 				}
 			}
 			util.Sleep(10)
@@ -95,7 +96,7 @@ func startUpdateMgr(c config.Config) (configChan chan bool) {
 		for {
 			restart := updater.Update(c)
 			if restart {
-				configChan<- true
+				configChan <- true
 				return
 			}
 			util.Sleep(c.UpdateInterval)
