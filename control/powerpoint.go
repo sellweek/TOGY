@@ -1,7 +1,6 @@
 package control
 
 import (
-	"TOGY/util"
 	"os/exec"
 )
 
@@ -11,13 +10,13 @@ type PowerPointBroadcast struct {
 	//Path to PowerPoint executable
 	powerPoint string
 	//Current running PowerPoint instance
-	cmd exec.Cmd
+	cmd *exec.Cmd
 }
 
 // Starts PowerPoint in presentation mode.
-func (*PowerPointBroadcast b) Start() error {
+func(b *PowerPointBroadcast) Start() error {
 	cmd := exec.Command(b.powerPoint, "/s", b.path)
-	err = cmd.start()
+	err := cmd.Start()
 	if err != nil {
 		return err
 	}
@@ -26,16 +25,16 @@ func (*PowerPointBroadcast b) Start() error {
 }
 
 //Sends Terminate signal to PowerPoint.
-func (*PowerPointBroadcast b) Kill() error {
-	err = b.cmd.Process.Kill()
+func(b *PowerPointBroadcast) Kill() error {
+	err := b.cmd.Process.Kill()
 	if err != nil {
 		return err
 	}
 	b.cmd = nil
-	return
+	return nil
 }
 
-func (PowerPointBroadcast b) Status() bool {
+func(b PowerPointBroadcast) Status() bool {
 	if b.cmd == nil {
 		return false
 	}

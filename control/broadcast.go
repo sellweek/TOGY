@@ -5,10 +5,10 @@ package control
 type Broadcast interface {
 	//Start function instructs handler application to
 	//start playing the broadcast.
-	Start() err
+	Start() error
 	//Kill kills the handler application
 	//stopping the broadcast.
-	Kill() err
+	Kill() error
 	//Status returns boolean that specifies
 	//whether the broadcast is currently running
 	Status() bool
