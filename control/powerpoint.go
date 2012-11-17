@@ -5,23 +5,43 @@ import (
 	"os/exec"
 )
 
+type PowerPointBroadcast struct {
+	//Path to the presentation
+	path string
+	//Path to PowerPoint executable
+	powerPoint string
+	//Current running PowerPoint instance
+	cmd exec.Cmd
+}
+
 // Starts PowerPoint in presentation mode.
-func StartPresentation(ppExe, path string) error {
-	err := exec.Command(ppExe, "/s", path).Start()
+func (*PowerPointBroadcast b) Start() error {
+	cmd := exec.Command(b.powerPoint, "/s", b.path)
+	err = cmd.start()
 	if err != nil {
 		return err
 	}
+	b.cmd = cmd
 	return nil
 }
 
 //Sends Terminate signal to PowerPoint.
-func KillPresentation() {
-	exec.Command("taskkill", "/IM", "POWERPNT.exe").Run()
+func (*PowerPointBroadcast b) Kill() error {
+	err = b.cmd.Process.Kill()
+	if err != nil {
+		return err
+	}
+	b.cmd = nil
+	return
 }
 
-//Kills powerpoint and loads presentation at p.
-func ReloadPresentation(ppExe, p string) {
-	KillPresentation()
-	util.Sleep(1)
-	StartPresentation(ppExe, p)
+func (PowerPointBroadcast b) Status() bool {
+	if b.cmd == nil {
+		return false
+	}
+	return true
+}
+
+func NewPowerPoint(ppExe, presentation string) (*PowerPointBroadcast) {
+	return &PowerPointBroadcast{path: presentation, powerPoint: ppExe}
 }
