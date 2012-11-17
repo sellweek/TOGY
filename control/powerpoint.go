@@ -41,6 +41,10 @@ func(b PowerPointBroadcast) Status() bool {
 	return true
 }
 
+func (b PowerPointBroadcast) Path() string {
+	return b.path
+}
+
 func NewPowerPoint(ppExe, presentation string) (*PowerPointBroadcast) {
 	return &PowerPointBroadcast{path: presentation, powerPoint: ppExe}
 }
