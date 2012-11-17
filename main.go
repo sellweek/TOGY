@@ -9,7 +9,7 @@ import (
 
 const configPath = "config.json"
 
-var presentationOn = false
+var broadcastProcess control.Broadcast = nil
 
 func main() {
 	conf, err := config.Get(configPath)
@@ -48,20 +48,21 @@ func startScreenMgr(c config.Config) chan bool {
 				return
 			default:
 				if c.Broadcast() {
-					if !presentationOn {
+					if broadcastProcess == nil {
 						broadcast, err := updater.GetCurrentBroadcast(".")
 						if err != nil {
 							c.Log.Println("Could not get current broadcast: ", err)
 							continue
 						}
 
-						err = control.StartPresentation(c.PowerPoint, broadcast)
+						broadcastProcess = control.NewPowerPoint(c.PowerPoint, broadcast)
+						err = broadcastProcess.Start()
 						if err != nil {
 							c.Log.Println("Could not start presentation: ", err)
+							broadcastProcess = nil
 							util.Sleep(20)
 							continue
 						}
-						presentationOn = true
 					}
 
 					err := control.TurnScreenOn()
@@ -76,9 +77,9 @@ func startScreenMgr(c config.Config) chan bool {
 						c.Log.Println("Could not turn screen off: ", err)
 						continue
 					}
-					if presentationOn {
-						control.KillPresentation()
-						presentationOn = false
+					if broadcastProcess != nil {
+						broadcastProcess.Kill()
+						broadcastProcess = nil
 					}
 					c.Log.Println("The screen is off")
 				}
@@ -92,13 +93,20 @@ func startScreenMgr(c config.Config) chan bool {
 
 func startUpdateMgr(c config.Config) (configChan chan bool) {
 	configChan = make(chan bool)
+	//We have to wait until the current presentation is started
+	//so that we don not pass nil because of starting the update
+	//before the broadcast.
+	util.Sleep(30)
 
 	go func() {
 		for {
-			restart := updater.Update(c)
+			newBP, restart := updater.Update(c, broadcastProcess)
 			if restart {
 				configChan <- true
 				return
+			}
+			if newBP != nil {
+				broadcastProcess = newBP
 			}
 			util.Sleep(c.UpdateInterval)
 		}

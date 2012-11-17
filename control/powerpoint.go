@@ -13,7 +13,7 @@ type PowerPointBroadcast struct {
 	cmd *exec.Cmd
 }
 
-// Starts PowerPoint in presentation mode.
+//Start starts PowerPoint in presentation mode.
 func(b *PowerPointBroadcast) Start() error {
 	cmd := exec.Command(b.powerPoint, "/s", b.path)
 	err := cmd.Start()
@@ -24,7 +24,7 @@ func(b *PowerPointBroadcast) Start() error {
 	return nil
 }
 
-//Sends Terminate signal to PowerPoint.
+//Kill ends Terminate signal to PowerPoint.
 func(b *PowerPointBroadcast) Kill() error {
 	err := b.cmd.Process.Kill()
 	if err != nil {
