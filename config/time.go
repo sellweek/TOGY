@@ -19,7 +19,7 @@ func (tc TimeConfig) IsBroadcastingTime(t time.Time) bool {
 }
 
 //Tests if according to the config there should be a broadcast on specified time.
-func (c Config) BroadcastTime(t time.Time) bool {
+func (c Config) BroadcastingTime(t time.Time) bool {
 	if c.OverrideOn {
 		return true
 	}
@@ -27,8 +27,7 @@ func (c Config) BroadcastTime(t time.Time) bool {
 		return false
 	}
 	if c.IsOverridenDay(t) {
-		tc := c.OverrideDays[util.NormalizeDate(t)]
-		return tc.IsBroadcastingTime(t)
+		return c.OverrideDays[util.NormalizeDate(t)].IsBroadcastingTime(t)
 	}
 	return 0 != t.Weekday() && 6 != t.Weekday() && c.StandardTimeSettings.IsBroadcastingTime(t)
 }
@@ -36,5 +35,5 @@ func (c Config) BroadcastTime(t time.Time) bool {
 //Returns whether there should be broadcast at the current time.
 func (c Config) Broadcast() bool {
 	now := time.Now()
-	return c.BroadcastTime(now)
+	return c.BroadcastingTime(now)
 }
