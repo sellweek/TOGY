@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"encoding/json"
+	"fmt"
 )
 
 const broadcastPath = "activeBroadcast"
@@ -48,82 +49,92 @@ func Update(c config.Config, runningBroadcast control.Broadcast) (b control.Broa
 	}
 
 	if ui.Broadcast {
-		b = getBroadcast(ui, c, runningBroadcast)
+		c.Log.Println("Downloading new broadcast.")
+		b, err = getBroadcast(ui, c, runningBroadcast)
+		if err != nil {
+			c.Log.Println("Error when updating broadcast: ", err)
+			return nil, false
+		} else {
+			c.Log.Println("Downloaded new broadcast.")
+		}
 	}
 
 	if ui.Config {
-		getConfig(c)
-		conf = true
+		c.Log.Println("Downloading new config")
+		err = getConfig(c)
+		if err != nil {
+			c.Log.Println("Error when downloading new config: ", err)
+			conf = false
+		} else {
+			conf = true
+			c.Log.Println("Downloaded new config.")
+		}
 	}
 	return
 }
 
-func getConfig(c config.Config) {
-	c.Log.Println("Downloading new config")
+func getConfig(c config.Config) error {
 	err := downloadFile(c.UpdateURL+"/config?client=" + c.Name, c.CentralPath)
 	if err != nil {
-		c.Log.Println("Could not download or save new configuration: ", err)
+		return fmt.Errorf("Could not download or save new configuration: %v", err)
 	}
 
 	_, err = http.Get(c.UpdateURL + "/gotConfig" + "?client=" + c.Name)
 	if err != nil {
 		c.Log.Println("Could not announce succesful download of configuration:", err)
 	}
-
+	return nil
 }
 
 
-func getBroadcast(ui updateInfo, c config.Config, runningBroadcast control.Broadcast) control.Broadcast {
-
-	c.Log.Println("Downloading new version")
-	err := downloadFile(c.UpdateURL + "/download?client=" + c.Name, "newBroadcast."+ui.FileType)
+func getBroadcast(ui updateInfo, c config.Config, runningBroadcast control.Broadcast) (b control.Broadcast, err error) {
+	b = nil
+	err = downloadFile(c.UpdateURL + "/download?client=" + c.Name, "newBroadcast."+ui.FileType)
 	if err != nil {
-		c.Log.Println("Could not download or save presentation:", err)
-		return nil
-	}
-	if runningBroadcast != nil {
-		runningBroadcast.Kill()
-		util.Sleep(1)
-		//We have to remove the current broadcast, because its file type
-		//could be different from the one we will download.
-		err = os.Remove(runningBroadcast.Path())
-	} else {
-		cb, err := GetCurrentBroadcast(".")
-		if err != nil {
-			c.Log.Println("Could not find current broadcast:", err)
-		}
-		err = os.Remove(cb)
+		err = fmt.Errorf("Could not download or save presentation: %v", err)
+		return
 	}
 
+	//It should be safe to call Kill(), becuase runningBroadcast should not be a nil pointer
+	//because we are starting updater goroutine after 30 second delay
+	//and Kill() is a no-op if the broadcast has already been killed.
+	runningBroadcast.Kill()
+	//We have to wait a bit to ensure that handler application
+	//will not block the removal of the file.
+	util.Sleep(1)
+	//We have to remove the current broadcast, because its file type
+	//could be different from the one we will download.
+	err = os.Remove(runningBroadcast.Path())
 	if err != nil {
-		c.Log.Println("Could not remove current broadcast: ", err)
+		err = fmt.Errorf("Could not remove current broadcast: %v", err)
+		return
 	}
-
 
 	err = os.Rename("newBroadcast."+ui.FileType, broadcastPath+"."+ui.FileType)
 	if err != nil {
-		c.Log.Println("Could not move presentation:", err)
-		return nil
+		err =fmt.Errorf("Could not move presentation: %v", err)
+		return
 	}
 	
 	util.Sleep(1)
 	currPath, err := GetCurrentBroadcast(".")
 	if err != nil {
-		c.Log.Println("Could not find current broadcast:", err)
+		err = fmt.Errorf("Could not find current broadcast: %v", err)
+		return
 	}
 
-	var currCast control.Broadcast = control.NewPowerPoint(c.PowerPoint, currPath)
+	b = control.NewPowerPoint(c.PowerPoint, currPath)
 
-	if err := currCast.Start(); err != nil {
-		c.Log.Println("Could not start broadcast:", err)
-		return nil
+	if err = b.Start(); err != nil {
+		fmt.Errorf("Could not start broadcast: %v", err)
+		return
 	}
 
 	_, err = http.Get(c.UpdateURL + "/downloadComplete" + "?client=" + c.Name)
 	if err != nil {
 		c.Log.Println("Could not announce succesful download of broadcast:", err)
 	}
-	return currCast
+	return
 }
 
 //Downloads file from specified URL to specified path.

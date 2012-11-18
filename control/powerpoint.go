@@ -26,6 +26,9 @@ func(b *PowerPointBroadcast) Start() error {
 
 //Kill ends Terminate signal to PowerPoint.
 func(b *PowerPointBroadcast) Kill() error {
+	if b.cmd == nil {
+		return nil
+	}
 	err := b.cmd.Process.Kill()
 	if err != nil {
 		return err
