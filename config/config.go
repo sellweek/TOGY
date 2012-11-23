@@ -14,12 +14,16 @@ const dateFormat = "2006-1-2"
 
 //Cofiguration as unmarshaled from JSON.
 //Times are specified with minute precision in a format like this: 15:04
-// Dates should have this format: 2010-3-12
+//Dates should have this format: 2010-3-12
+//These two intermediate structs could be replaced by a map[string]interface{},
+//but I tried to do it and the simplification that it affords 
+//would be outweighed by the need to use type assertions everywhere
+//and some strange type errors.
 type localConfig struct {
-	PowerPoint           string
-	UpdateURL            string
-	LogFile              string
-	Name string
+	PowerPoint  string
+	UpdateURL   string
+	LogFile     string
+	Name        string
 	CentralPath string
 }
 
@@ -28,7 +32,7 @@ type centralConfig struct {
 	OverrideDays         map[string]map[string]string
 	OverrideOn           bool
 	OverrideOff          bool
-	UpdateInterval		int
+	UpdateInterval       int
 }
 
 //The real configuration struct.
@@ -43,8 +47,8 @@ type Config struct {
 	UpdateURL            string
 	UpdateInterval       int
 	Log                  *log.Logger
-	Name string
-	CentralPath string
+	Name                 string
+	CentralPath          string
 }
 
 //Struct representing time when the TV should be running.
@@ -61,7 +65,7 @@ func getLocal(path string) (l localConfig, err error) {
 
 func (l localConfig) GetCentral() (c centralConfig, err error) {
 	err = getJSONFile(l.CentralPath, &c)
-	return	
+	return
 }
 
 func Get(path string) (conf Config, err error) {
@@ -73,7 +77,7 @@ func Get(path string) (conf Config, err error) {
 	if err != nil {
 		return
 	}
-	conf, err = joinConfigs(l ,c)
+	conf, err = joinConfigs(l, c)
 	return
 }
 
@@ -106,13 +110,13 @@ func joinConfigs(l localConfig, c centralConfig) (conf Config, err error) {
 
 	conf.Log = log.New(logOut, "", log.LstdFlags)
 
-	conf.OverrideOn 	= c.OverrideOn
-	conf.OverrideOff 	= c.OverrideOff
-	conf.PowerPoint 	= l.PowerPoint
-	conf.UpdateURL 		= l.UpdateURL
+	conf.OverrideOn = c.OverrideOn
+	conf.OverrideOff = c.OverrideOff
+	conf.PowerPoint = l.PowerPoint
+	conf.UpdateURL = l.UpdateURL
 	conf.UpdateInterval = c.UpdateInterval
-	conf.Name 			= l.Name
-	conf.CentralPath	= l.CentralPath
+	conf.Name = l.Name
+	conf.CentralPath = l.CentralPath
 	return
 }
 

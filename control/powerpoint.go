@@ -14,7 +14,7 @@ type PowerPointBroadcast struct {
 }
 
 //Start starts PowerPoint in presentation mode.
-func(b *PowerPointBroadcast) Start() error {
+func (b *PowerPointBroadcast) Start() error {
 	cmd := exec.Command(b.powerPoint, "/s", b.path)
 	err := cmd.Start()
 	if err != nil {
@@ -25,7 +25,7 @@ func(b *PowerPointBroadcast) Start() error {
 }
 
 //Kill ends Terminate signal to PowerPoint.
-func(b *PowerPointBroadcast) Kill() error {
+func (b *PowerPointBroadcast) Kill() error {
 	if b.cmd == nil {
 		return nil
 	}
@@ -37,7 +37,7 @@ func(b *PowerPointBroadcast) Kill() error {
 	return nil
 }
 
-func(b PowerPointBroadcast) Status() bool {
+func (b PowerPointBroadcast) Status() bool {
 	if b.cmd == nil {
 		return false
 	}
@@ -48,6 +48,6 @@ func (b PowerPointBroadcast) Path() string {
 	return b.path
 }
 
-func NewPowerPoint(ppExe, presentation string) (*PowerPointBroadcast) {
+func NewPowerPoint(ppExe, presentation string) *PowerPointBroadcast {
 	return &PowerPointBroadcast{path: presentation, powerPoint: ppExe}
 }

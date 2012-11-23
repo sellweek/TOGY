@@ -15,4 +15,3 @@ type Broadcast interface {
 	//Path returns the location of the broadcast file
 	Path() string
 }
-

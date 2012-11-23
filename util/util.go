@@ -2,9 +2,9 @@ package util
 
 import (
 	"os"
-	"time"
 	"strconv"
 	"strings"
+	"time"
 )
 
 var Tz *time.Location
@@ -47,11 +47,11 @@ func Sleep(seconds int) {
 	<-t.C
 }
 
-func GetFileType(filename string) (string) {
+func GetFileType(filename string) string {
 	parts := strings.Split(filename, ".")
 	if len(parts) < 2 {
 		return ""
 	}
-	
+
 	return parts[len(parts)-1]
 }

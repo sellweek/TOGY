@@ -1,9 +1,9 @@
 package updater
 
 import (
+	"errors"
 	"os"
 	"strings"
-	"errors"
 )
 
 func GetCurrentBroadcast(dir string) (string, error) {

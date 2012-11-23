@@ -4,20 +4,20 @@ import (
 	"TOGY/config"
 	"TOGY/control"
 	"TOGY/util"
+	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
-	"encoding/json"
-	"fmt"
 )
 
 const broadcastPath = "activeBroadcast"
 
 type updateInfo struct {
 	Broadcast bool
-	FileType string
-	Config bool
+	FileType  string
+	Config    bool
 }
 
 func getUpdateInfo(url, name string) (upd updateInfo, err error) {
@@ -74,7 +74,7 @@ func Update(c config.Config, runningBroadcast control.Broadcast) (b control.Broa
 }
 
 func getConfig(c config.Config) error {
-	err := downloadFile(c.UpdateURL+"/config?client=" + c.Name, c.CentralPath)
+	err := downloadFile(c.UpdateURL+"/config?client="+c.Name, c.CentralPath)
 	if err != nil {
 		return fmt.Errorf("Could not download or save new configuration: %v", err)
 	}
@@ -86,10 +86,9 @@ func getConfig(c config.Config) error {
 	return nil
 }
 
-
 func getBroadcast(ui updateInfo, c config.Config, runningBroadcast control.Broadcast) (b control.Broadcast, err error) {
 	b = nil
-	err = downloadFile(c.UpdateURL + "/download?client=" + c.Name, "newBroadcast."+ui.FileType)
+	err = downloadFile(c.UpdateURL+"/download?client="+c.Name, "newBroadcast."+ui.FileType)
 	if err != nil {
 		err = fmt.Errorf("Could not download or save presentation: %v", err)
 		return
@@ -112,10 +111,10 @@ func getBroadcast(ui updateInfo, c config.Config, runningBroadcast control.Broad
 
 	err = os.Rename("newBroadcast."+ui.FileType, broadcastPath+"."+ui.FileType)
 	if err != nil {
-		err =fmt.Errorf("Could not move presentation: %v", err)
+		err = fmt.Errorf("Could not move presentation: %v", err)
 		return
 	}
-	
+
 	util.Sleep(1)
 	currPath, err := GetCurrentBroadcast(".")
 	if err != nil {
