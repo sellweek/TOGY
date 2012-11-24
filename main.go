@@ -6,9 +6,11 @@ import (
 	"TOGY/updater"
 	"TOGY/util"
 	"flag"
+	"fmt"
 )
 
 var configPath = flag.String("config", "./config.json", "The path to the local config file.")
+var coldStart = flag.Bool("coldStart", false, "Download active broadcast, current config and terminate.")
 
 var broadcastProcess control.Broadcast = nil
 
@@ -19,6 +21,13 @@ func main() {
 		panic(err)
 	}
 	conf.Log.Println("Loaded config.")
+	if *coldStart {
+		err = updater.ColdStart(conf)
+		if err != nil {
+			fmt.Println("Error: ", err)
+		}
+		return
+	}
 
 	for {
 		scrExit := startScreenMgr(conf)

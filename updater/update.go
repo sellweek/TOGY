@@ -74,9 +74,9 @@ func Update(c config.Config, runningBroadcast control.Broadcast) (b control.Broa
 }
 
 func getConfig(c config.Config) error {
-	err := downloadFile(c.UpdateURL+"/config?client="+c.Name, c.CentralPath)
+	err := downloadConfig(c, true)
 	if err != nil {
-		return fmt.Errorf("Could not download or save new configuration: %v", err)
+		return err
 	}
 
 	_, err = http.Get(c.UpdateURL + "/gotConfig" + "?client=" + c.Name)
@@ -133,6 +133,44 @@ func getBroadcast(ui updateInfo, c config.Config, runningBroadcast control.Broad
 	if err != nil {
 		c.Log.Println("Could not announce succesful download of broadcast:", err)
 	}
+	return
+}
+
+//downloadBroadcast downloads active broadcast from server. If identify is true,
+//it will announce its client name to the server.
+//Currently, the broadcast will have its suffix set to ppt, even if
+//its another type of file.
+func downloadBroadcast(c config.Config, identify bool) (err error) {
+	downloadAddress := c.UpdateURL+"/download"
+	if identify {
+		downloadAddress += "?client="+c.Name
+	}
+	err = downloadFile(c.UpdateURL+"/download?client="+c.Name, "activeBroadcast.ppt")
+	return
+}
+
+//downloadConfig downloads centralConfig from server. If identify is true,
+//it will announce its client name to the server.
+func downloadConfig(c config.Config, identify bool) (err error) {
+	downloadAddress := c.UpdateURL+"/config"
+	if identify {
+		downloadAddress += "?client="+c.Name
+	}
+	err = downloadFile(downloadAddress, c.CentralPath)
+	if err != nil {
+		return fmt.Errorf("Could not download or save new configuration: %v", err)
+	}
+	return
+}
+
+//ColdStart downloads centralConfig and current broadcast from the server 
+//without reporting the client name.
+func ColdStart(c config.Config) (err error) {
+	err = downloadBroadcast(c, false)
+	if err != nil {
+		return
+	}
+	err = downloadConfig(c, false)
 	return
 }
 
