@@ -5,14 +5,16 @@ import (
 	"TOGY/control"
 	"TOGY/updater"
 	"TOGY/util"
+	"flag"
 )
 
-const configPath = "config.json"
+var configPath = flag.String("config", "./config.json", "The path to the local config file.")
 
 var broadcastProcess control.Broadcast = nil
 
 func main() {
-	conf, err := config.Get(configPath)
+	flag.Parse()
+	conf, err := config.Get(*configPath)
 	if err != nil {
 		panic(err)
 	}
@@ -24,7 +26,7 @@ func main() {
 
 		<-confChan
 
-		newConf, err := config.Get(configPath)
+		newConf, err := config.Get(*configPath)
 		if err != nil {
 			conf.Log.Println("Could not load new configuration file: ", err)
 			continue
