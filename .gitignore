@@ -26,6 +26,7 @@ _testmain.go
 
 #Keep out local files
 *.ppt
+*.pptx
 log.txt
 centralConfig.json
 activeBroadcast.*

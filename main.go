@@ -9,7 +9,7 @@ import (
 	"fmt"
 )
 
-var configPath = flag.String("config", "./config.json", "The path to the local config file.")
+var configPath = flag.String("config", "config.json", "The path to the local config file.")
 var coldStart = flag.Bool("coldStart", false, "Download active broadcast, current config and terminate.")
 
 var broadcastProcess control.Broadcast = nil
@@ -52,6 +52,16 @@ func main() {
 func startScreenMgr(c config.Config) chan bool {
 	exitChan := make(chan bool)
 
+	if broadcastProcess == nil {
+		broadcast, err := updater.GetCurrentBroadcast(".")
+		if err != nil {
+			c.Log.Println("Could not get current broadcast: ", err)
+			panic("Could not get current broadcast")
+		}
+
+		broadcastProcess = control.NewPowerPoint(c.PowerPoint, broadcast)
+	}
+
 	go func() {
 		for {
 			select {
@@ -59,23 +69,13 @@ func startScreenMgr(c config.Config) chan bool {
 				return
 			default:
 				if c.Broadcast() {
-					if broadcastProcess == nil {
-						broadcast, err := updater.GetCurrentBroadcast(".")
-						if err != nil {
-							c.Log.Println("Could not get current broadcast: ", err)
-							continue
-						}
-
-						broadcastProcess = control.NewPowerPoint(c.PowerPoint, broadcast)
-						err = broadcastProcess.Start()
+					if !broadcastProcess.Status() {
+						err := broadcastProcess.Start()
 						if err != nil {
 							c.Log.Println("Could not start presentation: ", err)
 							broadcastProcess = nil
-							util.Sleep(20)
-							continue
 						}
 					}
-
 					err := control.TurnScreenOn()
 					if err != nil {
 						c.Log.Println("Could not turn screen on: ", err)
@@ -88,9 +88,8 @@ func startScreenMgr(c config.Config) chan bool {
 						c.Log.Println("Could not turn screen off: ", err)
 						continue
 					}
-					if broadcastProcess != nil {
+					if broadcastProcess.Status() {
 						broadcastProcess.Kill()
-						broadcastProcess = nil
 					}
 					c.Log.Println("The screen is off")
 				}
@@ -105,7 +104,7 @@ func startScreenMgr(c config.Config) chan bool {
 func startUpdateMgr(c config.Config) (configChan chan bool) {
 	configChan = make(chan bool)
 	//We have to wait until the current presentation is started
-	//so that we don not pass nil because of starting the update
+	//so that we do not pass nil because of starting the update
 	//before the broadcast.
 	util.Sleep(30)
 

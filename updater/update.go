@@ -94,13 +94,16 @@ func getBroadcast(ui updateInfo, c config.Config, runningBroadcast control.Broad
 		return
 	}
 
-	//It should be safe to call Kill(), becuase runningBroadcast should not be a nil pointer
-	//because we are starting updater goroutine after 30 second delay
-	//and Kill() is a no-op if the broadcast has already been killed.
-	runningBroadcast.Kill()
-	//We have to wait a bit to ensure that handler application
-	//will not block the removal of the file.
-	util.Sleep(1)
+	if runningBroadcast.Status() {
+		err = runningBroadcast.Kill()
+		if err != nil {
+			err = fmt.Errorf("Could not kill handler program: %v", err)
+			return
+		}
+		//We have to wait a bit to ensure that handler application
+		//will not block the removal of the file.
+		util.Sleep(1)
+	}
 	//We have to remove the current broadcast, because its file type
 	//could be different from the one we will download.
 	err = os.Remove(runningBroadcast.Path())
