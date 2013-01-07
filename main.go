@@ -16,18 +16,24 @@ var broadcastProcess control.Broadcast = nil
 
 func main() {
 	flag.Parse()
-	conf, err := config.Get(*configPath)
-	if err != nil {
-		panic(err)
-	}
-	conf.Log.Println("Loaded config.")
+
 	if *coldStart {
+		conf, err := config.ColdStart(*configPath)
+		if err != nil {
+			fmt.Println("Error: ", err)
+		}
 		err = updater.ColdStart(conf)
 		if err != nil {
 			fmt.Println("Error: ", err)
 		}
 		return
 	}
+
+	conf, err := config.Get(*configPath)
+	if err != nil {
+		panic(err)
+	}
+	conf.Log.Println("Loaded config.")
 
 	for {
 		scrExit := startScreenMgr(conf)
@@ -49,7 +55,7 @@ func main() {
 
 }
 
-func startScreenMgr(c config.Config) chan bool {
+func startScreenMgr(c *config.Config) chan bool {
 	exitChan := make(chan bool)
 
 	if broadcastProcess == nil {
@@ -101,7 +107,7 @@ func startScreenMgr(c config.Config) chan bool {
 	return exitChan
 }
 
-func startUpdateMgr(c config.Config) (configChan chan bool) {
+func startUpdateMgr(c *config.Config) (configChan chan bool) {
 	configChan = make(chan bool)
 	//We have to wait until the current presentation is started
 	//so that we do not pass nil because of starting the update

@@ -68,7 +68,7 @@ func (l localConfig) GetCentral() (c centralConfig, err error) {
 	return
 }
 
-func Get(path string) (conf Config, err error) {
+func Get(path string) (conf *Config, err error) {
 	l, err := getLocal(path)
 	if err != nil {
 		return
@@ -81,8 +81,29 @@ func Get(path string) (conf Config, err error) {
 	return
 }
 
-//Converts jsonConfig to Config.
-func joinConfigs(l localConfig, c centralConfig) (conf Config, err error) {
+func ColdStart(path string) (conf *Config, err error) {
+	l, err := getLocal(path)
+	if err != nil {
+		return
+	}
+	conf = new(Config)
+	joinLocal(l, conf)
+	return
+}
+
+func joinLocal(l localConfig, c *Config) {
+	c.PowerPoint = l.PowerPoint
+	c.UpdateURL = l.UpdateURL
+	c.Name = l.Name
+	c.CentralPath = l.CentralPath
+	logOut, err := os.Create(l.LogFile)
+	if err != nil {
+		logOut = os.Stderr
+	}
+	c.Log = log.New(logOut, "", log.LstdFlags)
+}
+
+func joinCentral(c centralConfig, conf *Config) (err error) {
 	conf.StandardTimeSettings, err = makeTimeConfig(c.StandardTimeSettings)
 	conf.OverrideDays = make(map[time.Time]TimeConfig)
 	if err != nil {
@@ -103,20 +124,16 @@ func joinConfigs(l localConfig, c centralConfig) (conf Config, err error) {
 		}
 	}
 
-	logOut, err := os.Create(l.LogFile)
-	if err != nil {
-		logOut = os.Stderr
-	}
-
-	conf.Log = log.New(logOut, "", log.LstdFlags)
-
 	conf.OverrideOn = c.OverrideOn
 	conf.OverrideOff = c.OverrideOff
-	conf.PowerPoint = l.PowerPoint
-	conf.UpdateURL = l.UpdateURL
-	conf.UpdateInterval = c.UpdateInterval
-	conf.Name = l.Name
-	conf.CentralPath = l.CentralPath
+	return
+}
+
+//Converts jsonConfig to Config.
+func joinConfigs(l localConfig, c centralConfig) (conf *Config, err error) {
+	conf = new(Config)
+	joinLocal(l, conf)
+	err = joinCentral(c, conf)
 	return
 }
 

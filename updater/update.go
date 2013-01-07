@@ -40,7 +40,7 @@ func getUpdateInfo(url, name string) (upd updateInfo, err error) {
 //broadcast was updated.
 //Second return value is true if configuration was updated, 
 //because that makes restart of almost the whole program necessary.
-func Update(c config.Config, runningBroadcast control.Broadcast) (b control.Broadcast, conf bool) {
+func Update(c *config.Config, runningBroadcast control.Broadcast) (b control.Broadcast, conf bool) {
 	conf = false
 	ui, err := getUpdateInfo(c.UpdateURL, c.Name)
 	c.Log.Println("Got update info:", ui, err)
@@ -74,7 +74,7 @@ func Update(c config.Config, runningBroadcast control.Broadcast) (b control.Broa
 	return
 }
 
-func getConfig(c config.Config) error {
+func getConfig(c *config.Config) error {
 	err := downloadConfig(c, true)
 	if err != nil {
 		return err
@@ -87,7 +87,7 @@ func getConfig(c config.Config) error {
 	return nil
 }
 
-func getBroadcast(ui updateInfo, c config.Config, runningBroadcast control.Broadcast) (b control.Broadcast, err error) {
+func getBroadcast(ui updateInfo, c *config.Config, runningBroadcast control.Broadcast) (b control.Broadcast, err error) {
 	b = nil
 	err = downloadFile(c.UpdateURL+"/presentation/active/download?client="+c.Name, "newBroadcast."+ui.FileType)
 	if err != nil {
@@ -144,18 +144,18 @@ func getBroadcast(ui updateInfo, c config.Config, runningBroadcast control.Broad
 //it will announce its client name to the server.
 //Currently, the broadcast will have its suffix set to ppt, even if
 //its another type of file.
-func downloadBroadcast(c config.Config, identify bool) (err error) {
-	downloadAddress := c.UpdateURL+"/download"
+func downloadBroadcast(c *config.Config, identify bool) (err error) {
+	downloadAddress := c.UpdateURL+"/presentation/active/download"
 	if identify {
 		downloadAddress += "?client="+c.Name
 	}
-	err = downloadFile(c.UpdateURL+"/download?client="+c.Name, "activeBroadcast.ppt")
+	err = downloadFile(downloadAddress, "activeBroadcast.ppt")
 	return
 }
 
 //downloadConfig downloads centralConfig from server. If identify is true,
 //it will announce its client name to the server.
-func downloadConfig(c config.Config, identify bool) (err error) {
+func downloadConfig(c *config.Config, identify bool) (err error) {
 	downloadAddress := c.UpdateURL+"/config/download"
 	if identify {
 		downloadAddress += "?client="+c.Name
@@ -169,7 +169,7 @@ func downloadConfig(c config.Config, identify bool) (err error) {
 
 //ColdStart downloads centralConfig and current broadcast from the server 
 //without reporting the client name.
-func ColdStart(c config.Config) (err error) {
+func ColdStart(c *config.Config) (err error) {
 	err = downloadBroadcast(c, false)
 	if err != nil {
 		return
