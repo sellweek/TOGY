@@ -21,7 +21,7 @@ type updateInfo struct {
 }
 
 func getUpdateInfo(url, name string) (upd updateInfo, err error) {
-	resp, err := http.Get(url + "?client=" + name)
+	resp, err := http.Get(url + "/update?client=" + name)
 	if err != nil {
 		return
 	}
@@ -30,6 +30,7 @@ func getUpdateInfo(url, name string) (upd updateInfo, err error) {
 	if err != nil {
 		return
 	}
+	fmt.Println(respBody)
 	err = json.Unmarshal(respBody, &upd)
 	return
 }
@@ -88,7 +89,7 @@ func getConfig(c config.Config) error {
 
 func getBroadcast(ui updateInfo, c config.Config, runningBroadcast control.Broadcast) (b control.Broadcast, err error) {
 	b = nil
-	err = downloadFile(c.UpdateURL+"/download?client="+c.Name, "newBroadcast."+ui.FileType)
+	err = downloadFile(c.UpdateURL+"/presentation/active/download?client="+c.Name, "newBroadcast."+ui.FileType)
 	if err != nil {
 		err = fmt.Errorf("Could not download or save presentation: %v", err)
 		return
@@ -132,7 +133,7 @@ func getBroadcast(ui updateInfo, c config.Config, runningBroadcast control.Broad
 		return
 	}
 
-	_, err = http.Get(c.UpdateURL + "/downloadComplete" + "?client=" + c.Name)
+	_, err = http.Get(c.UpdateURL + "/presentation/active/downloadComplete" + "?client=" + c.Name)
 	if err != nil {
 		c.Log.Println("Could not announce succesful download of broadcast:", err)
 	}
@@ -155,7 +156,7 @@ func downloadBroadcast(c config.Config, identify bool) (err error) {
 //downloadConfig downloads centralConfig from server. If identify is true,
 //it will announce its client name to the server.
 func downloadConfig(c config.Config, identify bool) (err error) {
-	downloadAddress := c.UpdateURL+"/config"
+	downloadAddress := c.UpdateURL+"/config/download"
 	if identify {
 		downloadAddress += "?client="+c.Name
 	}
