@@ -8,12 +8,13 @@
 			"TurnOn": "08:30",
 			"TurnOff": "12:30"
 		},
-		"2013-1-19": {
+		"2015-1-19": {
 			"TurnOn": "08:30",
 			"TurnOff": "12:30"
 		}
 	},
 	"OverrideOn": false,
 	"OverrideOff": false,
-	"updateInterval": 10
+	"updateInterval": 10,
+	"weekends": false
 }

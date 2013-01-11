@@ -32,6 +32,7 @@ type centralConfig struct {
 	OverrideDays         map[string]map[string]string
 	OverrideOn           bool
 	OverrideOff          bool
+	Weekends             bool
 	UpdateInterval       int
 }
 
@@ -49,6 +50,7 @@ type Config struct {
 	Log                  *log.Logger
 	Name                 string
 	CentralPath          string
+	Weekends             bool
 }
 
 //Struct representing time when the TV should be running.
@@ -124,6 +126,7 @@ func joinCentral(c centralConfig, conf *Config) (err error) {
 		}
 	}
 
+	conf.Weekends = c.Weekends
 	conf.OverrideOn = c.OverrideOn
 	conf.OverrideOff = c.OverrideOff
 	return

@@ -29,11 +29,19 @@ func (c Config) BroadcastingTime(t time.Time) bool {
 	if c.IsOverridenDay(t) {
 		return c.OverrideDays[util.NormalizeDate(t)].IsBroadcastingTime(t)
 	}
-	return 0 != t.Weekday() && 6 != t.Weekday() && c.StandardTimeSettings.IsBroadcastingTime(t)
+	if c.Weekends {
+		return c.StandardTimeSettings.IsBroadcastingTime(t)
+	}
+
+	return !isWeekend(t) && c.StandardTimeSettings.IsBroadcastingTime(t)
 }
 
 //Returns whether there should be broadcast at the current time.
 func (c Config) Broadcast() bool {
 	now := time.Now()
 	return c.BroadcastingTime(now)
+}
+
+func isWeekend(t time.Time) bool {
+	return 0 == t.Weekday() || 6 == t.Weekday()
 }

@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-var conf config.Config
+var conf *config.Config
 var tz, _ = time.LoadLocation("UTC")
 
 func init() {
@@ -19,22 +19,30 @@ func init() {
 
 func TestNormalBroadcast(t *testing.T) {
 	tm := time.Date(2012, 10, 4, 9, 24, 0, 0, tz)
-	if !conf.BroadcastTime(tm) {
+	if !conf.BroadcastingTime(tm) {
 		t.Error("Does not broadcast on a normal day.")
 	}
 }
 
 func TestNormalNotBroadcast(t *testing.T) {
 	tm := time.Date(2012, 10, 4, 7, 00, 0, 0, tz)
-	if conf.BroadcastTime(tm) {
+	if conf.BroadcastingTime(tm) {
 		t.Error("Does not broadcast on a normal day.")
 	}
 }
 
 func TestWeekend(t *testing.T) {
-	tm := time.Date(2012, 9, 8, 13, 0, 0, 0, tz)
-	if conf.BroadcastTime(tm) {
-		t.Error("Broadcasts during the weekend.")
+	c := conf
+	for i := 8; i < 2000; i += 7 {
+		c.Weekends = false
+		tm := time.Date(2012, 9, i, 13, 0, 0, 0, tz)
+		if conf.BroadcastingTime(tm) {
+			t.Error("Broadcasts during the weekend.")
+		}
+		c.Weekends = true
+		if !conf.BroadcastingTime(tm) {
+			t.Error("Does not broadcast during the weekend. Date: " + tm.String())
+		}
 	}
 }
 
@@ -47,7 +55,7 @@ func TestOverrideDay(t *testing.T) {
 
 func TestOverridenNotBroadcast(t *testing.T) {
 	tm := time.Date(2012, 10, 7, 0, 0, 0, 0, tz)
-	if conf.BroadcastTime(tm) {
+	if conf.BroadcastingTime(tm) {
 		t.Error("Broadcasted out of set time on overriden date.")
 	}
 }

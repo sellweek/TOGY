@@ -145,9 +145,9 @@ func getBroadcast(ui updateInfo, c *config.Config, runningBroadcast control.Broa
 //Currently, the broadcast will have its suffix set to ppt, even if
 //its another type of file.
 func downloadBroadcast(c *config.Config, identify bool) (err error) {
-	downloadAddress := c.UpdateURL+"/presentation/active/download"
+	downloadAddress := c.UpdateURL + "/presentation/active/download"
 	if identify {
-		downloadAddress += "?client="+c.Name
+		downloadAddress += "?client=" + c.Name
 	}
 	err = downloadFile(downloadAddress, "activeBroadcast.ppt")
 	return
@@ -156,9 +156,9 @@ func downloadBroadcast(c *config.Config, identify bool) (err error) {
 //downloadConfig downloads centralConfig from server. If identify is true,
 //it will announce its client name to the server.
 func downloadConfig(c *config.Config, identify bool) (err error) {
-	downloadAddress := c.UpdateURL+"/config/download"
+	downloadAddress := c.UpdateURL + "/config/download"
 	if identify {
-		downloadAddress += "?client="+c.Name
+		downloadAddress += "?client=" + c.Name
 	}
 	err = downloadFile(downloadAddress, c.CentralPath)
 	if err != nil {
