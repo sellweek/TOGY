@@ -13,7 +13,7 @@ type info struct {
 	Config    bool
 }
 
-func getInfo(c config.Config) (i info, err error) {
+func GetInfo(c config.Config) (i info, err error) {
 	r, err := downloadInfo("/update?client=" + c.Name)
 	defer r.Close()
 	if err != nil {

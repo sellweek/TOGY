@@ -9,56 +9,31 @@ import (
 	"time"
 )
 
-func DownloadConfig(c config.Config) (f *os.File, err error) {
-	resp, err := http.Get(c.UpdateURL + "/config/download?client=" + c.Name)
-	defer resp.Body.Close()
-	f, err = createTempFile("config", "json", resp.Body)
-	return
+func DownloadConfig(c config.Config, destFile string) error {
+	return downloadFile(c.UpdateURL+"/config/download?client="+c.Name, destFile)
 }
 
-func DownloadBroadcast(c config.Config, ft string) (f *os.File, err error) {
-	resp, err := http.Get(c.UpdateURL + "/presentation/active/download?client" + c.Name)
-	defer resp.Body.Close()
+func DownloadBroadcast(c config.Config, ft string, destDir string) (err error) {
+	srcUrl := c.UpdateURL + "/presentation/active/download?client=" + c.Name
 
-	f, err = createTempFile("broadcast", ft, resp.Body)
-	if err != nil {
-		return
-	}
 	if ft != "zip" {
+		err = downloadFile(srcUrl, destDir+string(os.PathSeparator)+"broadcast."+ft)
 		return
 	}
 
-	defer f.Close()
+	tempFileName := os.TempDir() + string(os.PathSeparator) + "unzip-" + time.Now().String() + ".zip"
 
-	dirName := os.TempDir() + "/broadcast-zip-" + time.Now().String()
-	err = os.Mkdir(dirName, os.ModePerm)
+	err = downloadFile(srcUrl, tempFileName)
 	if err != nil {
 		return
 	}
 
-	fi, err := f.Stat()
-	if err != nil {
-		return
-	}
+	err = unzip(destDir, tempFileName)
 
-	err = unzip(dirName, fi.Name())
-	if err != nil {
-		return
-	}
-	return os.Open(dirName)
-}
-
-func createTempFile(prefix, fileType string, data io.Reader) (f *os.File, err error) {
-	name := os.TempDir() + prefix + "-" + time.Now().String() + "." + fileType
-	f, err = os.Create(name)
-	if err != nil {
-		return
-	}
-	_, err = io.Copy(f, data)
 	return
 }
 
-func unzip(dirname string, fn string) (err error) {
+func unzip(dirname, fn string) (err error) {
 	r, err := zip.OpenReader(fn)
 	if err != nil {
 		return
@@ -71,7 +46,7 @@ func unzip(dirname string, fn string) (err error) {
 			return
 		}
 		var df *os.File
-		df, err = os.Create(dirname + "/" + sf.Name)
+		df, err = os.Create(dirname + string(os.PathSeparator) + sf.Name)
 		if err != nil {
 			return
 		}
@@ -81,4 +56,16 @@ func unzip(dirname string, fn string) (err error) {
 		}
 	}
 	return nil
+}
+
+func downloadFile(src, dest string) (err error) {
+	resp, err := http.Get(src)
+	defer resp.Body.Close()
+
+	f, err := os.Create(dest)
+	if err != nil {
+		return
+	}
+	_, err = io.Copy(f, resp.Body)
+	return
 }
