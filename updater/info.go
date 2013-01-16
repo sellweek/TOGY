@@ -7,13 +7,13 @@ import (
 	"net/http"
 )
 
-type info struct {
+type Info struct {
 	Broadcast bool
-	FileType  bool
+	FileType  string
 	Config    bool
 }
 
-func GetInfo(c config.Config) (i info, err error) {
+func GetInfo(c config.Config) (i Info, err error) {
 	r, err := downloadInfo("/update?client=" + c.Name)
 	defer r.Close()
 	if err != nil {
@@ -31,8 +31,20 @@ func downloadInfo(url string) (io.ReadCloser, error) {
 	return resp.Body, nil
 }
 
-func parseInfo(r io.Reader) (i info, err error) {
+func parseInfo(r io.Reader) (i Info, err error) {
 	d := json.NewDecoder(r)
 	err = d.Decode(i)
 	return
+}
+
+func AnnounceBroadcast(c config.Config) error {
+	url := c.UpdateURL + "/api/presentation/active/downloadComplete?client=" + c.Name
+	_, err := http.Get(url)
+	return err
+}
+
+func AnnounceConfig(c config.Config) error {
+	url := c.UpdateURL + "/api/config/downloadComplete?client=" + c.Name
+	_, err := http.Get(url)
+	return err
 }
