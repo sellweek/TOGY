@@ -13,12 +13,12 @@ type Info struct {
 	Config    bool
 }
 
-func GetInfo(c config.Config) (i Info, err error) {
-	r, err := downloadInfo("/update?client=" + c.Name)
-	defer r.Close()
+func GetInfo(c *config.Config) (i Info, err error) {
+	r, err := downloadInfo(c.UpdateURL + "/update?client=" + c.Name)
 	if err != nil {
 		return
 	}
+	defer r.Close()
 
 	return parseInfo(r)
 }
@@ -33,17 +33,17 @@ func downloadInfo(url string) (io.ReadCloser, error) {
 
 func parseInfo(r io.Reader) (i Info, err error) {
 	d := json.NewDecoder(r)
-	err = d.Decode(i)
+	err = d.Decode(&i)
 	return
 }
 
-func AnnounceBroadcast(c config.Config) error {
+func AnnounceBroadcast(c *config.Config) error {
 	url := c.UpdateURL + "/api/presentation/active/downloadComplete?client=" + c.Name
 	_, err := http.Get(url)
 	return err
 }
 
-func AnnounceConfig(c config.Config) error {
+func AnnounceConfig(c *config.Config) error {
 	url := c.UpdateURL + "/api/config/downloadComplete?client=" + c.Name
 	_, err := http.Get(url)
 	return err

@@ -3,5 +3,6 @@
 	"CentralPath": "centralConfig.json",
 	"PowerPoint": "C:\\Program Files\\Microsoft Office\\Office14\\POWERPNT.EXE",
 	"UpdateURL": "http://sellweek-testing.appspot.com/api",
-	"LogFile": "log.txt"
+	"LogFile": "log.txt",
+	"BroadcastDir": "broadcast"
 }

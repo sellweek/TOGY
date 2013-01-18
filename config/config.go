@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -20,11 +21,12 @@ const dateFormat = "2006-1-2"
 //would be outweighed by the need to use type assertions everywhere
 //and some strange type errors.
 type localConfig struct {
-	PowerPoint  string
-	UpdateURL   string
-	LogFile     string
-	Name        string
-	CentralPath string
+	PowerPoint   string
+	UpdateURL    string
+	LogFile      string
+	Name         string
+	CentralPath  string
+	BroadcastDir string
 }
 
 type centralConfig struct {
@@ -46,11 +48,12 @@ type Config struct {
 	OverrideOff          bool
 	PowerPoint           string
 	UpdateURL            string
-	UpdateInterval       int
+	UpdateInterval       time.Duration
 	Log                  *log.Logger
 	Name                 string
 	CentralPath          string
 	Weekends             bool
+	BroadcastDir         string
 }
 
 //Struct representing time when the TV should be running.
@@ -97,6 +100,7 @@ func joinLocal(l localConfig, c *Config) {
 	c.PowerPoint = l.PowerPoint
 	c.UpdateURL = l.UpdateURL
 	c.Name = l.Name
+	c.BroadcastDir = l.BroadcastDir
 	c.CentralPath = l.CentralPath
 	logOut, err := os.Create(l.LogFile)
 	if err != nil {
@@ -125,6 +129,8 @@ func joinCentral(c centralConfig, conf *Config) (err error) {
 			return
 		}
 	}
+
+	conf.UpdateInterval, err = time.ParseDuration(strconv.Itoa(c.UpdateInterval) + "s")
 
 	conf.Weekends = c.Weekends
 	conf.OverrideOn = c.OverrideOn

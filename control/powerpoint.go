@@ -15,6 +15,9 @@ type PowerPointBroadcast struct {
 
 //Start starts PowerPoint in presentation mode.
 func (b *PowerPointBroadcast) Start() error {
+	if b.Status() {
+		return nil
+	}
 	cmd := exec.Command(b.powerPoint, "/s", b.path)
 	err := cmd.Start()
 	if err != nil {

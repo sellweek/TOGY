@@ -9,11 +9,11 @@ import (
 	"time"
 )
 
-func DownloadConfig(c config.Config, destFile string) error {
+func DownloadConfig(c *config.Config, destFile string) error {
 	return downloadFile(c.UpdateURL+"/config/download?client="+c.Name, destFile)
 }
 
-func DownloadBroadcast(c config.Config, ft string, destDir string) (err error) {
+func DownloadBroadcast(c *config.Config, ft string, destDir string) (err error) {
 	srcUrl := c.UpdateURL + "/presentation/active/download?client=" + c.Name
 
 	if ft != "zip" {
