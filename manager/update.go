@@ -4,6 +4,7 @@ import (
 	"TOGY/updater"
 	"fmt"
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -75,6 +76,7 @@ func updateBroadcast(mgr *Manager, ft string) error {
 	}
 
 	mgr.block()
+	defer mgr.unblock()
 
 	mgr.config.Log.Println("Moving new broadcast into place")
 	err = deleteAll(mgr.config.BroadcastDir)
@@ -95,7 +97,7 @@ func updateBroadcast(mgr *Manager, ft string) error {
 }
 
 func makeTempDir() (path string, err error) {
-	path = os.TempDir() + "broadcast-download-" + time.Now().String()
+	path = os.TempDir() + string(os.PathSeparator) + "broadcast-download-" + strconv.Itoa(int(time.Now().Unix()))
 	err = os.Mkdir(path, os.ModePerm)
 	if err != nil {
 		return

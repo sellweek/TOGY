@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -21,7 +22,7 @@ func DownloadBroadcast(c *config.Config, ft string, destDir string) (err error) 
 		return
 	}
 
-	tempFileName := os.TempDir() + string(os.PathSeparator) + "unzip-" + time.Now().String() + ".zip"
+	tempFileName := os.TempDir() + string(os.PathSeparator) + "unzip-" + strconv.Itoa(int(time.Now().Unix())) + ".zip"
 
 	err = downloadFile(srcUrl, tempFileName)
 	if err != nil {

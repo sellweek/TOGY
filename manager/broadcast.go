@@ -26,6 +26,7 @@ func broadcastManager(mgr *Manager) {
 				mgr.broadcastErr <- err
 				continue
 			}
+			mgr.config.Log.Println("Turning screen on")
 			err = control.TurnScreenOn()
 			if err != nil {
 				mgr.broadcastErr <- err
@@ -33,20 +34,22 @@ func broadcastManager(mgr *Manager) {
 			}
 
 		case stopBroadcast:
-			if presentation == nil {
-				continue
-			}
-			err := presentation.Kill()
+			mgr.config.Log.Println("Turning screen off")
+			err := control.TurnScreenOff()
 			if err != nil {
 				mgr.broadcastErr <- err
 				continue
 			}
 
-			err = control.TurnScreenOff()
+			if presentation == nil {
+				continue
+			}
+			err = presentation.Kill()
 			if err != nil {
 				mgr.broadcastErr <- err
 				continue
 			}
+
 			presentation = nil
 			mgr.config.Log.Println("The presentation was stopped")
 
