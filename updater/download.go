@@ -51,6 +51,7 @@ func unzip(dirname, fn string) (err error) {
 		if err != nil {
 			return
 		}
+		defer df.Close()
 		_, err = io.Copy(df, fr)
 		if err != nil {
 			return
@@ -67,6 +68,8 @@ func downloadFile(src, dest string) (err error) {
 	if err != nil {
 		return
 	}
+	defer f.Close()
+
 	_, err = io.Copy(f, resp.Body)
 	return
 }
