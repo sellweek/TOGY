@@ -26,7 +26,7 @@ func scheduleManager(mgr *Manager, t <-chan time.Time) {
 
 		case _ = <-mgr.scheduleChan:
 			mgr.config.Log.Println("Schedule manager terminating")
-			break
+			return
 		}
 	}
 }

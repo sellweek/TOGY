@@ -34,7 +34,7 @@ func updateManager(mgr *Manager, t <-chan time.Time) {
 				}
 				mgr.reloadSignal <- true
 				mgr.config.Log.Println("Config updated, restarting manager.")
-				break
+				return
 			}
 		}
 	}
