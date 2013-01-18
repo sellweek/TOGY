@@ -3,12 +3,12 @@ package config
 import (
 	"TOGY/util"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"strconv"
 	"time"
-	"fmt"
 )
 
 const timeFormat = "15:04"

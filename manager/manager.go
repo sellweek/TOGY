@@ -30,6 +30,7 @@ func Run(cp string) (err error) {
 		c.Log.Println("Reloading manager")
 		mgr := New(c)
 		mgr.Run()
+		c.Log.Println("Manager running")
 	}
 	return
 }

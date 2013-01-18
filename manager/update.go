@@ -23,6 +23,7 @@ func updateManager(mgr *Manager, t <-chan time.Time) {
 				if err != nil {
 					mgr.config.Log.Println(err)
 				}
+				mgr.config.Log.Println("Broadcast updated")
 			}
 
 			if i.Config {
@@ -32,6 +33,7 @@ func updateManager(mgr *Manager, t <-chan time.Time) {
 					mgr.config.Log.Println(err)
 				}
 				mgr.reloadSignal <- true
+				mgr.config.Log.Println("Config updated, restarting manager.")
 				break
 			}
 		}
@@ -43,6 +45,7 @@ func updateConfig(mgr *Manager) error {
 	if err != nil {
 		return fmt.Errorf("Error while updating config: %v", err)
 	}
+	mgr.config.Log.Println("Config succesfully downloaded, announcing.")
 	err = updater.AnnounceConfig(mgr.config)
 	if err != nil {
 		return fmt.Errorf("Error while announcing the download of config: %v", err)
@@ -59,6 +62,7 @@ func updateBroadcast(mgr *Manager, ft string) error {
 	if err != nil {
 		return fmt.Errorf("Error while downloading new broadcast: %v", err)
 	}
+	mgr.config.Log.Println("Broadcast successfully downloaded, announcing.")
 
 	err = updater.AnnounceBroadcast(mgr.config)
 	if err != nil {
@@ -72,6 +76,7 @@ func updateBroadcast(mgr *Manager, ft string) error {
 
 	mgr.block()
 
+	mgr.config.Log.Println("Moving new broadcast into place")
 	err = deleteAll(mgr.config.BroadcastDir)
 	if err != nil {
 		return fmt.Errorf("Error while deleting old broadcast: %v", err)

@@ -19,7 +19,7 @@ func broadcastManager(mgr *Manager) {
 					continue
 				}
 				presentation = control.NewPowerPoint(mgr.config.PowerPoint, pth)
-
+				mgr.config.Log.Println("New presentation was created")
 			}
 			err := presentation.Start()
 			if err != nil {
@@ -48,15 +48,19 @@ func broadcastManager(mgr *Manager) {
 				continue
 			}
 			presentation = nil
+			mgr.config.Log.Println("The presentation was stopped")
 
 		case block:
+			mgr.config.Log.Println("Broadcast manager blocked.")
 			for m := range mgr.broadcastChan {
 				if m == unblock {
+					mgr.config.Log.Println("Broadcast manager unblocked.")
 					break
 				}
 			}
 		}
 	}
+	mgr.config.Log.Println("Broadcast manager terminating")
 }
 
 func getPresentation(dir string) (string, error) {
