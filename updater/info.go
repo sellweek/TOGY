@@ -38,13 +38,13 @@ func parseInfo(r io.Reader) (i Info, err error) {
 }
 
 func AnnounceBroadcast(c *config.Config) error {
-	url := c.UpdateURL + "/api/presentation/active/downloadComplete?client=" + c.Name
+	url := c.UpdateURL + "/presentation/active/downloadComplete?client=" + c.Name
 	_, err := http.Get(url)
 	return err
 }
 
 func AnnounceConfig(c *config.Config) error {
-	url := c.UpdateURL + "/api/config/downloadComplete?client=" + c.Name
+	url := c.UpdateURL + "/config/downloadComplete?client=" + c.Name
 	_, err := http.Get(url)
 	return err
 }

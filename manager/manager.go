@@ -53,10 +53,10 @@ func (m *Manager) Start() {
 
 func New(c *config.Config) (m *Manager) {
 	m = new(Manager)
-	m.broadcastChan = make(chan int)
-	m.broadcastErr = make(chan error)
-	m.scheduleChan = make(chan bool)
-	m.reloadSignal = make(chan bool)
+	/*	m.broadcastChan = make(chan int)
+		m.broadcastErr = make(chan error)
+		m.scheduleChan = make(chan bool)
+		m.reloadSignal = make(chan bool)*/
 	m.config = c
 	return
 }
