@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"time"
+	"fmt"
 )
 
 const timeFormat = "15:04"
@@ -98,9 +99,13 @@ func joinLocal(l localConfig, c *Config) {
 	c.UpdateURL = l.UpdateURL
 	c.Name = l.Name
 	c.CentralPath = l.CentralPath
-	logOut, err := os.Create(l.LogFile)
+	logOut, err := os.OpenFile(l.LogFile, os.O_APPEND, os.ModePerm)
 	if err != nil {
-		logOut = os.Stderr
+		logOut, err = os.Create(l.LogFile)
+		if err != nil {
+			fmt.Println(err)
+			logOut = os.Stderr
+		}
 	}
 	c.Log = log.New(logOut, "", log.LstdFlags)
 }
