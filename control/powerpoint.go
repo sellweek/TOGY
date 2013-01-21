@@ -41,7 +41,7 @@ func (b *PowerPointBroadcast) Kill() error {
 }
 
 func (b PowerPointBroadcast) Status() bool {
-	if b.cmd == nil || b.cmd.ProcessState == nil || b.cmd.ProcessState.Exited() {
+	if b.cmd == nil {
 		return false
 	}
 	return true
