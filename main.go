@@ -1,8 +1,11 @@
 package main
 
 import (
+	"TOGY/config"
 	"TOGY/manager"
+	"TOGY/updater"
 	"flag"
+	"fmt"
 )
 
 var configPath = flag.String("config", "config.json", "The path to the local config file.")
@@ -11,7 +14,7 @@ var coldStart = flag.Bool("coldStart", false, "Download active broadcast, curren
 func main() {
 	flag.Parse()
 
-	/*if *coldStart {
+	if *coldStart {
 		conf, err := config.ColdStart(*configPath)
 		if err != nil {
 			fmt.Println("Error: ", err)
@@ -21,7 +24,7 @@ func main() {
 			fmt.Println("Error: ", err)
 		}
 		return
-	}*/
+	}
 	err := manager.Run(*configPath)
 	if err != nil {
 		panic(err)

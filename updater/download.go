@@ -34,6 +34,19 @@ func DownloadBroadcast(c *config.Config, ft string, destDir string) (err error) 
 	return
 }
 
+func ColdStart(c *config.Config) (err error) {
+	ui, err := GetInfo(c)
+	if err != nil {
+		return err
+	}
+	err = DownloadConfig(c, c.CentralPath)
+	if err != nil {
+		return err
+	}
+	err = DownloadBroadcast(c, ui.FileType, c.BroadcastDir)
+	return
+}
+
 func unzip(dirname, fn string) (err error) {
 	r, err := zip.OpenReader(fn)
 	if err != nil {
