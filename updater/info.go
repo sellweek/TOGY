@@ -44,7 +44,7 @@ func AnnounceBroadcast(c *config.Config) error {
 }
 
 func AnnounceConfig(c *config.Config) error {
-	url := c.UpdateURL + "/cofig/downloadComplete?client=" + c.Name
+	url := c.UpdateURL + "/config/downloadComplete?client=" + c.Name
 	_, err := http.Get(url)
 	return err
 }
