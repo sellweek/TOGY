@@ -1,7 +1,7 @@
 package config_test
 
 import (
-	"TOGY/config"
+	"github.com/sellweek/TOGY/config"
 	"testing"
 	"time"
 )

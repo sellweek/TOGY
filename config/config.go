@@ -1,9 +1,9 @@
 package config
 
 import (
-	"TOGY/util"
 	"encoding/json"
 	"fmt"
+	"github.com/sellweek/TOGY/util"
 	"io/ioutil"
 	"log"
 	"os"

@@ -1,11 +1,11 @@
 package main
 
 import (
-	"TOGY/config"
-	"TOGY/manager"
-	"TOGY/updater"
 	"flag"
 	"fmt"
+	"github.com/sellweek/TOGY/config"
+	"github.com/sellweek/TOGY/manager"
+	"github.com/sellweek/TOGY/updater"
 )
 
 var configPath = flag.String("config", "config.json", "The path to the local config file.")

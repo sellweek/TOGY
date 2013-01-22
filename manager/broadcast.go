@@ -1,7 +1,7 @@
 package manager
 
 import (
-	"TOGY/control"
+	"github.com/sellweek/TOGY/control"
 	"os"
 	"strings"
 )

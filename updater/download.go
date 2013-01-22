@@ -1,8 +1,8 @@
 package updater
 
 import (
-	"TOGY/config"
 	"archive/zip"
+	"github.com/sellweek/TOGY/config"
 	"io"
 	"net/http"
 	"os"

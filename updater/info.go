@@ -1,8 +1,8 @@
 package updater
 
 import (
-	"TOGY/config"
 	"encoding/json"
+	"github.com/sellweek/TOGY/config"
 	"io"
 	"net/http"
 )

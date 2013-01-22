@@ -1,8 +1,8 @@
 package manager
 
 import (
-	"TOGY/updater"
 	"fmt"
+	"github.com/sellweek/TOGY/updater"
 	"os"
 	"strconv"
 	"time"

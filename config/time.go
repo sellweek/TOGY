@@ -1,7 +1,7 @@
 package config
 
 import (
-	"TOGY/util"
+	"github.com/sellweek/TOGY/util"
 	"time"
 )
 
