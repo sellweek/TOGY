@@ -93,6 +93,8 @@ func updateBroadcast(mgr *Manager, ft string) error {
 	if err != nil {
 		return fmt.Errorf("Error while starting new broadcast: %v", err)
 	}
+
+	_ = deleteAll(path)
 	return nil
 }
 
