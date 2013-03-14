@@ -7,16 +7,6 @@ import (
 	"time"
 )
 
-var Tz *time.Location
-
-func init() {
-	var err error
-	Tz, err = time.LoadLocation("UTC")
-	if err != nil {
-		panic(err)
-	}
-}
-
 //Returns true if the file on path a was modified later than the file on path b.
 //If an error is encountered, returns false and the error.
 func IsNewer(a, b string) (bool, error) {
@@ -34,11 +24,11 @@ func IsNewer(a, b string) (bool, error) {
 }
 
 func NormalizeDate(t time.Time) time.Time {
-	return time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, Tz)
+	return time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, time.UTC)
 }
 
 func NormalizeTime(t time.Time) time.Time {
-	return time.Date(1, 1, 1, t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), Tz)
+	return time.Date(1, 1, 1, t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), time.UTC)
 }
 
 func Sleep(seconds int) {
