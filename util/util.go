@@ -38,7 +38,7 @@ func NormalizeDate(t time.Time) time.Time {
 }
 
 func NormalizeTime(t time.Time) time.Time {
-	return time.Date(0, 0, 0, t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), Tz)
+	return time.Date(1, 1, 1, t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), Tz)
 }
 
 func Sleep(seconds int) {
