@@ -29,10 +29,10 @@ type Manager struct {
 	config *config.Config
 }
 
-//Run loads a local config file specified in cp
-//and starts and keeps running the broadcast,
-//handling updates and scheduling.
-func Run(cp string) (err error) {
+//RunBroadcast loads a local config file specified in cp,
+//starts up and keeps running the broadcast,
+//handling all the updates and scheduling.
+func RunBroadcast(cp string) (err error) {
 	for {
 		var c *config.Config
 		c, err = config.Get(cp)
