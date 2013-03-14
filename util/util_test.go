@@ -52,3 +52,18 @@ func TestNormalizeTime(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestFileType(t *testing.T) {
+	t.Parallel()
+	if util.GetFileType("hello.pptx") != "pptx" {
+		t.Fatal("GetFileType can't get a simple file type.")
+	}
+
+	if util.GetFileType("hello.pptx.tar.gz") != "gz" {
+		t.Fatal("GetFileType can't get the last file type.")
+	}
+
+	if util.GetFileType("README") != "" {
+		t.Fatal("GetFile gets a file extension when there is none.")
+	}
+}
