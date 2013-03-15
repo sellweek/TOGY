@@ -2,15 +2,29 @@ package manager
 
 import (
 	"github.com/sellweek/TOGY/control"
+	"github.com/sellweek/TOGY/util"
 	"os"
 	"strings"
 )
 
+//broadcastManager takes care of
+//turning the handler program and screen on and off.
+//It receives messages from the schedule manager
+//and starts and stops broadcast according to them.
+//All errors that occur are sent back on 
+//mgr.broadcastErr channel.
+//It can also be blocked, which makes it
+//wait for unblock message, throwing away all the
+//other messages.
 func broadcastManager(mgr *Manager) {
 	var presentation *control.PowerPointBroadcast
 	presentation = nil
 	for msg := range mgr.broadcastChan {
 		switch msg {
+		//When broadcast manager receives a message
+		//telling it to turn the broadcast on,
+		//it starts the handler application
+		//and turns the screen on. 
 		case startBroadcast:
 			if presentation == nil {
 				pth, err := getPresentation(mgr.config.BroadcastDir)
@@ -33,6 +47,10 @@ func broadcastManager(mgr *Manager) {
 				continue
 			}
 
+		//When broadcast manager receives a message
+		//telling it to stop the broadcast,
+		//it terminates the handler application
+		//and turns the screen off.
 		case stopBroadcast:
 			mgr.config.Log.Println("Turning screen off")
 			err := control.TurnScreenOff()
@@ -53,6 +71,9 @@ func broadcastManager(mgr *Manager) {
 			presentation = nil
 			mgr.config.Log.Println("The presentation was stopped")
 
+		//When broadcast manager receives a message
+		//telling it to block, it will throw away all
+		//messages received, unless they tell it to unblock.
 		case block:
 			mgr.config.Log.Println("Broadcast manager blocked.")
 			for m := range mgr.broadcastChan {
@@ -66,6 +87,9 @@ func broadcastManager(mgr *Manager) {
 	mgr.config.Log.Println("Broadcast manager terminating")
 }
 
+//getPresentation searches the given directory
+//for a file with "ppt" or "pptx" extension
+//and returns its name.
 func getPresentation(dir string) (string, error) {
 	f, err := os.Open(dir)
 	if err != nil {
@@ -83,16 +107,13 @@ func getPresentation(dir string) (string, error) {
 	return dir + string(os.PathSeparator) + fn, nil
 }
 
+//Searches a list of file names for the file with
+//a given extension and returns its name.
 func getFileWithType(ft string, fns []string) string {
 	for _, fn := range fns {
-		if getFileType(fn) == ft {
+		if util.GetFileType(fn) == ft {
 			return fn
 		}
 	}
 	return ""
-}
-
-func getFileType(fn string) string {
-	parts := strings.Split(fn, ".")
-	return parts[len(parts)-1]
 }
