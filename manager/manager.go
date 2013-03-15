@@ -6,18 +6,22 @@ import (
 )
 
 const (
-	startBroadcast = iota
+	startBroadcast bMsg = iota
 	stopBroadcast
 	block
 	unblock
 )
+
+//bMsg is the type of messages used
+//to control the broadcast manager.
+type bMsg int
 
 //Manager is a struct used to manage
 //the broadcast can be started and stopped
 //using it.
 type Manager struct {
 	//Chan used to send commands to broadcast manager.
-	broadcastChan chan int
+	broadcastChan chan bMsg
 	//Chan used to send errors back from broadcast manager.
 	broadcastErr chan error
 	//Chan used to send termination signal to schedule manager.
@@ -70,7 +74,7 @@ func (m *Manager) Start() {
 //New returns a new Manager with all the chans initialized.
 func New(c *config.Config) (m *Manager) {
 	m = new(Manager)
-	m.broadcastChan = make(chan int)
+	m.broadcastChan = make(chan bMsg)
 	m.broadcastErr = make(chan error)
 	m.scheduleChan = make(chan bool)
 	m.reloadSignal = make(chan bool)
@@ -103,7 +107,7 @@ func (m *Manager) unblock() {
 
 //Sends a message to the broadcast manager,
 //returning an erro, if it occurs there.
-func (m *Manager) sendAndWaitForError(msg int) error {
+func (m *Manager) sendAndWaitForError(msg bMsg) error {
 	m.broadcastChan <- msg
 	c := time.After(time.Second)
 	<-c
