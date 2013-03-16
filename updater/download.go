@@ -10,10 +10,14 @@ import (
 	"time"
 )
 
+//DownloadConfig ownloads a new centralConfig.json from the server
+//into the given path.
 func DownloadConfig(c *config.Config, destFile string) error {
 	return downloadFile(c.UpdateURL+"/config/download?client="+c.Name, destFile)
 }
 
+//DownloadBroadcast downloads a new broadcast from the server into a 
+//given directory, unzipping it, if it has .zip extension.
 func DownloadBroadcast(c *config.Config, ft string, destDir string) (err error) {
 	srcUrl := c.UpdateURL + "/presentation/active/download?client=" + c.Name
 
@@ -34,6 +38,9 @@ func DownloadBroadcast(c *config.Config, ft string, destDir string) (err error) 
 	return
 }
 
+//ColdStart downloads central config and the newest broadcast
+//into folders specified in config, without announcing
+//their downloads.
 func ColdStart(c *config.Config) (err error) {
 	ui, err := GetInfo(c)
 	if err != nil {
@@ -47,6 +54,10 @@ func ColdStart(c *config.Config) (err error) {
 	return
 }
 
+//Unzip unzips a file into given folder.
+//
+//WARNING: the unzipping is not recursive therefore it doesn't support
+//zip files with folders.
 func unzip(dirname, fn string) (err error) {
 	r, err := zip.OpenReader(fn)
 	if err != nil {
@@ -73,6 +84,7 @@ func unzip(dirname, fn string) (err error) {
 	return nil
 }
 
+//Downloads a file from given URL into given path using http.Get
 func downloadFile(src, dest string) (err error) {
 	resp, err := http.Get(src)
 	defer resp.Body.Close()
