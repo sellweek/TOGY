@@ -4,6 +4,9 @@ import (
 	"time"
 )
 
+//scheduleManager receives signals from a Ticker chan,
+//sending a message to turn the broadcast on or off,
+//depending on times set in Config. 
 func scheduleManager(mgr *Manager, t <-chan time.Time) {
 	for {
 		select {
