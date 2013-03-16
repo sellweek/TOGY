@@ -4,7 +4,6 @@ import (
 	"github.com/sellweek/TOGY/control"
 	"github.com/sellweek/TOGY/util"
 	"os"
-	"strings"
 )
 
 //broadcastManager takes care of
