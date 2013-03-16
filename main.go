@@ -14,6 +14,8 @@ var coldStart = flag.Bool("coldStart", false, "Download active broadcast, curren
 func main() {
 	flag.Parse()
 
+	//If the coldStart flag is set, we download
+	//the central config, broadcast and terminate.
 	if *coldStart {
 		conf, err := config.ColdStart(*configPath)
 		if err != nil {
