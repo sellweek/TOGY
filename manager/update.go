@@ -8,6 +8,9 @@ import (
 	"time"
 )
 
+//updateManager receives messages from a Ticker,
+//checking server for update info and downloading
+//updated config or broadcast.
 func updateManager(mgr *Manager, t <-chan time.Time) {
 	for {
 		select {
@@ -27,6 +30,8 @@ func updateManager(mgr *Manager, t <-chan time.Time) {
 				mgr.config.Log.Println("Broadcast updated")
 			}
 
+			//If a new config is downloaded, a reload signal is sent
+			//and updateManager terminates.
 			if i.Config {
 				mgr.config.Log.Println("Updating config")
 				err = updateConfig(mgr)
@@ -41,6 +46,8 @@ func updateManager(mgr *Manager, t <-chan time.Time) {
 	}
 }
 
+//updateConfig downloads a new config from server and announces its
+//succesful download back.
 func updateConfig(mgr *Manager) error {
 	err := updater.DownloadConfig(mgr.config, mgr.config.CentralPath)
 	if err != nil {
@@ -54,6 +61,8 @@ func updateConfig(mgr *Manager) error {
 	return nil
 }
 
+//updateBroadcast downloads a new broadcast from server,
+//announces its succesful download and moves it into place.
 func updateBroadcast(mgr *Manager, ft string) error {
 	path, err := makeTempDir()
 	if err != nil {
@@ -75,6 +84,8 @@ func updateBroadcast(mgr *Manager, ft string) error {
 		return fmt.Errorf("Error while stopping broadcast for update: %v", err)
 	}
 
+	//scheduleManager has to be blocked from interfering
+	//with us moving the broadcast into place.
 	mgr.block()
 	defer mgr.unblock()
 
@@ -98,6 +109,8 @@ func updateBroadcast(mgr *Manager, ft string) error {
 	return nil
 }
 
+//makeTempDir creates a directory in the temporary directory
+//returned by os.TempDir() and returns its path.
 func makeTempDir() (path string, err error) {
 	path = os.TempDir() + string(os.PathSeparator) + "broadcast-download-" + strconv.Itoa(int(time.Now().Unix()))
 	err = os.Mkdir(path, os.ModePerm)
@@ -107,6 +120,7 @@ func makeTempDir() (path string, err error) {
 	return
 }
 
+//moveFiles moves all the files from one directory into another.
 func moveFiles(src, dest string) (err error) {
 	sf, err := os.Open(src)
 	if err != nil {
@@ -128,6 +142,7 @@ func moveFiles(src, dest string) (err error) {
 	return
 }
 
+//deleteAll deletes all the files in given directory.
 func deleteAll(dir string) (err error) {
 	d, err := os.Open(dir)
 	if err != nil {
