@@ -2,7 +2,6 @@ package util
 
 import (
 	"os"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -29,12 +28,6 @@ func NormalizeDate(t time.Time) time.Time {
 
 func NormalizeTime(t time.Time) time.Time {
 	return time.Date(1, 1, 1, t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), time.UTC)
-}
-
-func Sleep(seconds int) {
-	del, _ := time.ParseDuration(strconv.Itoa(seconds) + "s")
-	t := time.NewTimer(del)
-	<-t.C
 }
 
 func GetFileType(filename string) string {
