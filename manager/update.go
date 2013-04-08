@@ -15,31 +15,31 @@ func updateManager(mgr *Manager, t <-chan time.Time) {
 	for {
 		select {
 		case _ = <-t:
-			mgr.config.Log.Println("Getting update info")
+			mgr.config.Notice("Getting update info")
 			i, err := updater.GetInfo(mgr.config)
 			if err != nil {
-				mgr.config.Log.Println("Error while downloading info: ", err)
+				mgr.config.Error("Error while downloading info: %v", err)
 				continue
 			}
 			if i.Broadcast {
-				mgr.config.Log.Println("Updating broadcast")
+				mgr.config.Notice("Updating broadcast")
 				err = updateBroadcast(mgr, i.FileType)
 				if err != nil {
-					mgr.config.Log.Println(err)
+					mgr.config.Error("Error when updating broadcast: %v", err)
 				}
-				mgr.config.Log.Println("Broadcast updated")
+				mgr.config.Notice("Broadcast updated")
 			}
 
 			//If a new config is downloaded, a reload signal is sent
 			//and updateManager terminates.
 			if i.Config {
-				mgr.config.Log.Println("Updating config")
+				mgr.config.Notice("Updating config")
 				err = updateConfig(mgr)
 				if err != nil {
-					mgr.config.Log.Println(err)
+					mgr.config.Error("Error when updating config: %v", err)
 				}
 				mgr.reloadSignal <- true
-				mgr.config.Log.Println("Config updated, restarting manager.")
+				mgr.config.Notice("Config updated, restarting manager.")
 				return
 			}
 		}
@@ -53,7 +53,7 @@ func updateConfig(mgr *Manager) error {
 	if err != nil {
 		return fmt.Errorf("Error while updating config: %v", err)
 	}
-	mgr.config.Log.Println("Config succesfully downloaded, announcing.")
+	mgr.config.Notice("Config succesfully downloaded, announcing.")
 	err = updater.AnnounceConfig(mgr.config)
 	if err != nil {
 		return fmt.Errorf("Error while announcing the download of config: %v", err)
@@ -72,7 +72,7 @@ func updateBroadcast(mgr *Manager, ft string) error {
 	if err != nil {
 		return fmt.Errorf("Error while downloading new broadcast: %v", err)
 	}
-	mgr.config.Log.Println("Broadcast successfully downloaded, announcing.")
+	mgr.config.Notice("Broadcast successfully downloaded, announcing.")
 
 	err = updater.AnnounceBroadcast(mgr.config)
 	if err != nil {
@@ -89,7 +89,7 @@ func updateBroadcast(mgr *Manager, ft string) error {
 	mgr.block()
 	defer mgr.unblock()
 
-	mgr.config.Log.Println("Moving new broadcast into place")
+	mgr.config.Notice("Moving new broadcast into place")
 	err = deleteAll(mgr.config.BroadcastDir)
 	if err != nil {
 		return fmt.Errorf("Error while deleting old broadcast: %v", err)

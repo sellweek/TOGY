@@ -43,10 +43,10 @@ func RunBroadcast(cp string) (err error) {
 		if err != nil {
 			return
 		}
-		c.Log.Println("Reloading manager")
+		c.Notice("Reloading manager")
 		mgr := New(c)
 		mgr.Run()
-		c.Log.Println("Manager running")
+		c.Notice("Manager running")
 	}
 	return
 }

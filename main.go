@@ -6,6 +6,8 @@ import (
 	"github.com/sellweek/TOGY/config"
 	"github.com/sellweek/TOGY/manager"
 	"github.com/sellweek/TOGY/updater"
+
+//	"github.com/sellweek/go-logging"
 )
 
 var configPath = flag.String("config", "config.json", "The path to the local config file.")
@@ -27,6 +29,7 @@ func main() {
 		}
 		return
 	}
+
 	err := manager.RunBroadcast(*configPath)
 	if err != nil {
 		panic(err)

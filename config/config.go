@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/sellweek/TOGY/util"
+	"github.com/sellweek/go-logging"
 	"io/ioutil"
 	"log"
 	"os"
@@ -50,11 +51,11 @@ type Config struct {
 	PowerPoint           string
 	UpdateURL            string
 	UpdateInterval       time.Duration
-	Log                  *log.Logger
 	Name                 string
 	CentralPath          string
 	Weekends             bool
 	BroadcastDir         string
+	*logging.Logger
 }
 
 //Struct representing time when the TV should be running.
@@ -111,7 +112,12 @@ func joinLocal(l localConfig, c *Config) {
 			logOut = os.Stderr
 		}
 	}
-	c.Log = log.New(logOut, "", log.LstdFlags)
+	//GetLogger always returns nil error so we can safely ignore it.
+	logr, _ := logging.GetLogger("TOGY")
+	c.Logger = logr
+	backend := logging.NewLogBackend(logOut, "", log.LstdFlags|log.Lshortfile)
+	logging.SetBackend(backend)
+	logging.SetLevel(logging.NOTICE, "TOGY")
 }
 
 func joinCentral(c centralConfig, conf *Config) (err error) {

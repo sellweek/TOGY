@@ -14,21 +14,21 @@ func scheduleManager(mgr *Manager, t <-chan time.Time) {
 			if mgr.config.Broadcast() {
 				err := mgr.startBroadcast()
 				if err != nil {
-					mgr.config.Log.Println("Error when starting broadcast: ", err)
+					mgr.config.Error("Error when starting broadcast: %v", err)
 					continue
 				}
-				mgr.config.Log.Println("Broadcast on")
+				mgr.config.Debug("Broadcast on")
 			} else {
 				err := mgr.stopBroadcast()
 				if err != nil {
-					mgr.config.Log.Println("Error when stopping broadcast: ", err)
+					mgr.config.Error("Error when stopping broadcast: %v", err)
 					continue
 				}
-				mgr.config.Log.Println("Broadcast off")
+				mgr.config.Debug("Broadcast off")
 			}
 
 		case _ = <-mgr.scheduleChan:
-			mgr.config.Log.Println("Schedule manager terminating")
+			mgr.config.Notice("Schedule manager terminating")
 			return
 		}
 	}

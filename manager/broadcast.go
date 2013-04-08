@@ -32,14 +32,14 @@ func broadcastManager(mgr *Manager) {
 					continue
 				}
 				presentation = control.NewPowerPoint(mgr.config.PowerPoint, pth)
-				mgr.config.Log.Println("New presentation was created")
+				mgr.config.Notice("New presentation was created")
 			}
 			err := presentation.Start()
 			if err != nil {
 				mgr.broadcastErr <- err
 				continue
 			}
-			mgr.config.Log.Println("Turning screen on")
+			mgr.config.Debug("Turning screen on")
 			err = control.TurnScreenOn()
 			if err != nil {
 				mgr.broadcastErr <- err
@@ -51,7 +51,7 @@ func broadcastManager(mgr *Manager) {
 		//it terminates the handler application
 		//and turns the screen off.
 		case stopBroadcast:
-			mgr.config.Log.Println("Turning screen off")
+			mgr.config.Debug("Turning screen off")
 			err := control.TurnScreenOff()
 			if err != nil {
 				mgr.broadcastErr <- err
@@ -68,22 +68,22 @@ func broadcastManager(mgr *Manager) {
 			}
 
 			presentation = nil
-			mgr.config.Log.Println("The presentation was stopped")
+			mgr.config.Notice("The presentation was stopped")
 
 		//When broadcast manager receives a message
 		//telling it to block, it will throw away all
 		//messages received, unless they tell it to unblock.
 		case block:
-			mgr.config.Log.Println("Broadcast manager blocked.")
+			mgr.config.Info("Broadcast manager blocked.")
 			for m := range mgr.broadcastChan {
 				if m == unblock {
-					mgr.config.Log.Println("Broadcast manager unblocked.")
+					mgr.config.Info("Broadcast manager unblocked.")
 					break
 				}
 			}
 		}
 	}
-	mgr.config.Log.Println("Broadcast manager terminating")
+	mgr.config.Notice("Broadcast manager terminating")
 }
 
 //getPresentation searches the given directory
