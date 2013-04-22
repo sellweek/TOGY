@@ -3,8 +3,8 @@ package config
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/op/go-logging"
 	"github.com/sellweek/TOGY/util"
-	"github.com/sellweek/go-logging"
 	"io/ioutil"
 	"log"
 	"os"
