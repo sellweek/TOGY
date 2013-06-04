@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/op/go-logging"
-	"github.com/sellweek/TOGY/util"
 	"io/ioutil"
 	"log"
 	"os"
@@ -19,7 +18,7 @@ const dateFormat = "2006-1-2"
 //Times are specified with minute precision in a format like this: 15:04
 //Dates should have this format: 2010-3-12
 //These two intermediate structs could be replaced by a map[string]interface{},
-//but I tried to do it and the simplification that it affords 
+//but I tried to do it and the simplification that it affords
 //would be outweighed by the need to use type assertions everywhere
 //and some strange type errors.
 type localConfig struct {
@@ -133,8 +132,6 @@ func joinCentral(c centralConfig, conf *Config) (err error) {
 			return
 		}
 
-		key = util.NormalizeDate(key)
-
 		conf.OverrideDays[key], err = makeTimeConfig(v)
 		if err != nil {
 			return
@@ -159,18 +156,16 @@ func joinConfigs(l localConfig, c centralConfig) (conf *Config, err error) {
 
 //Converts map of strings to strings (formatted as time) to a TimeConfig struct.
 func makeTimeConfig(times map[string]string) (tc TimeConfig, err error) {
-	on, err := time.Parse(timeFormat, times["TurnOn"])
+	tc.TurnOn, err = time.Parse(timeFormat, times["TurnOn"])
 	if err != nil {
 		return
 	}
 
-	off, err := time.Parse(timeFormat, times["TurnOff"])
+	tc.TurnOff, err = time.Parse(timeFormat, times["TurnOff"])
 	if err != nil {
 		return
 	}
 
-	tc.TurnOn = util.NormalizeTime(on)
-	tc.TurnOff = util.NormalizeTime(off)
 	return
 }
 
