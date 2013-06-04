@@ -54,16 +54,16 @@ func TestOverrideDay(t *testing.T) {
 	}
 }
 
-func TestOverridenNotBroadcast(t *testing.T) {
+func TestOverriddenNotBroadcast(t *testing.T) {
 	tm := time.Date(2012, 10, 7, 0, 0, 0, 0, tz)
 	if conf.BroadcastingTime(tm) {
-		t.Error("Broadcasted out of set time on overriden date.")
+		t.Error("Broadcasted out of set time on overridden date.")
 	}
 }
 
-func TestOverridenBroadcast(t *testing.T) {
+func TestOverriddenBroadcast(t *testing.T) {
 	tm := time.Date(2012, 10, 7, 9, 0, 0, 0, tz)
 	if !conf.IsOverridenDay(tm) {
-		t.Error("Did not broadcast on overriden date.")
+		t.Error("Did not broadcast on overridden date.")
 	}
 }
