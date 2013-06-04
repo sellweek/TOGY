@@ -11,8 +11,8 @@ import (
 	"time"
 )
 
-const timeFormat = "15:04"
-const dateFormat = "2006-1-2"
+const timeFormat = "15:04 -0700"
+const dateFormat = "2006-1-2 -0700"
 
 //Cofiguration as unmarshaled from JSON.
 //Times are specified with minute precision in a format like this: 15:04
@@ -44,7 +44,7 @@ type Config struct {
 	Presentation         string
 	UpdatePath           string
 	StandardTimeSettings TimeConfig
-	OverrideDays         map[time.Time]TimeConfig
+	OverrideDays         map[int64]TimeConfig
 	OverrideOn           bool
 	OverrideOff          bool
 	PowerPoint           string
@@ -121,16 +121,20 @@ func joinLocal(l localConfig, c *Config) {
 
 func joinCentral(c centralConfig, conf *Config) (err error) {
 	conf.StandardTimeSettings, err = makeTimeConfig(c.StandardTimeSettings)
-	conf.OverrideDays = make(map[time.Time]TimeConfig)
+	conf.OverrideDays = make(map[int64]TimeConfig)
 	if err != nil {
 		return
 	}
 	for k, v := range c.OverrideDays {
-		var key time.Time
-		key, err = time.Parse(dateFormat, k)
+		var (
+			key int64
+			t   time.Time
+		)
+		t, err = time.Parse(dateFormat, k)
 		if err != nil {
 			return
 		}
+		key = t.Unix()
 
 		conf.OverrideDays[key], err = makeTimeConfig(v)
 		if err != nil {

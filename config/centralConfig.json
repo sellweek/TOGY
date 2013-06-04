@@ -1,20 +1,20 @@
 {
 	"StandardTimeSettings": {
-		"TurnOn": "07:00",
-		"TurnOff": "15:30"
+		"TurnOn": "07:00 -0200",
+		"TurnOff": "15:30 -0200"
 	},
 	"OverrideDays": {
-		"2012-10-7": {
-			"TurnOn": "08:30",
-			"TurnOff": "12:30"
+		"2012-10-07 -0200": {
+			"TurnOn": "08:30 -0200",
+			"TurnOff": "12:30 -0200"
 		},
-		"2015-1-19": {
-			"TurnOn": "08:30",
-			"TurnOff": "12:30"
+		"2015-1-19 -0200": {
+			"TurnOn": "08:30 -0200",
+			"TurnOff": "12:30 -0200"
 		}
 	},
 	"OverrideOn": false,
 	"OverrideOff": false,
-	"updateInterval": 10,
-	"weekends": false
+	"UpdateInterval": 10,
+	"Weekends": false
 }
