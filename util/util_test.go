@@ -44,7 +44,7 @@ func TestNormalizeTime(t *testing.T) {
 	testf := func(y, m, d, h, min, s, n int) bool {
 		date := time.Date(y, time.Month(m), d, h, min, s, n, time.UTC)
 		norm := util.NormalizeTime(date)
-		return (norm.Year() == 1) && (norm.Month() == 1) && (norm.Day() == 1)
+		return (norm.Year() == 0) && (norm.Month() == 1) && (norm.Day() == 1)
 	}
 
 	err := quick.Check(testf, &conf)

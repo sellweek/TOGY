@@ -27,7 +27,7 @@ func NormalizeDate(t time.Time) time.Time {
 }
 
 func NormalizeTime(t time.Time) time.Time {
-	return time.Date(1, 1, 1, t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), time.UTC)
+	return time.Date(0, 1, 1, t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), time.UTC)
 }
 
 func GetFileType(filename string) string {
