@@ -26,30 +26,16 @@ func IsNewer(a, b string) (bool, error) {
 
 //NormalizeDate strips the time part from time.Date leaving only
 //year, month and day.
-//If forceTZ is true, its location will be set to util.Tz,
-//if false, it will be left as is.
-func NormalizeDate(t time.Time, forceTZ bool) time.Time {
-	var tz *time.Location
-	if forceTZ {
-		tz = Tz
-	} else {
-		tz = t.Location()
-	}
-	return time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, tz)
+func NormalizeDate(t time.Time) time.Time {
+	return time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, Tz)
 }
 
 //NormalizeTime strips the date part from time.Date leaving only
 //hours, minutes, seconds and nanoseconds.
 //If forceTZ is true, its location will be set to util.Tz,
 //if false, it will be left as is.
-func NormalizeTime(t time.Time, forceTZ bool) time.Time {
-	var tz *time.Location
-	if forceTZ {
-		tz = Tz
-	} else {
-		tz = t.Location()
-	}
-	return time.Date(0, 1, 1, t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), tz)
+func NormalizeTime(t time.Time) time.Time {
+	return time.Date(0, 1, 1, t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), Tz)
 }
 
 func GetFileType(filename string) string {

@@ -1,0 +1,16 @@
+{
+	"ArtifactsDest": "",
+	"TasksExclude": [
+		"go-vet"
+	],
+	"Arch": "386 amd64",
+	"Os": "windows",
+	"Resources": {
+		"Include": "config.json",
+		"Include": "broadcast",
+		"Exclude": "*.ppt",
+		"Exclude": "*.pptx"
+	},
+	"PackageVersion": "1.3.0",
+	"FormatVersion": "0.6"
+}

@@ -1,8 +1,8 @@
 {
 	"Name": "Testing-iMac",
 	"CentralPath": "centralConfig.json",
-	"PowerPoint": "C:\\Program Files\\Microsoft Office\\Office14\\POWERPNT.EXE",
-	"UpdateURL": "http://sellweek-testing.appspot.com/api",
+	"PowerPoint": "C:\\Program Files\\Microsoft Office 15\\root\\office15\\POWERPNT.EXE",
+	"UpdateURL": "http://localhost:8080/api",
 	"LogFile": "log.txt",
 	"BroadcastDir": "broadcast"
 }

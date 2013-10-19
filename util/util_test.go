@@ -27,10 +27,11 @@ func TestNormalizeDate(t *testing.T) {
 	t.Parallel()
 	testf := func(y, m, d, h, min, s, n int) bool {
 		date := time.Date(y, time.Month(m), d, h, min, s, n, time.UTC)
-		norm := util.NormalizeDate(date, true)
+		norm := util.NormalizeDate(date)
 		hm := (norm.Hour() == 0) && (norm.Minute() == 0)
 		sn := (norm.Second() == 0) && (norm.Nanosecond() == 0)
-		return hm && sn
+		tz := norm.Location() == util.Tz
+		return hm && sn && tz
 	}
 
 	err := quick.Check(testf, &conf)
@@ -43,8 +44,8 @@ func TestNormalizeTime(t *testing.T) {
 	t.Parallel()
 	testf := func(y, m, d, h, min, s, n int) bool {
 		date := time.Date(y, time.Month(m), d, h, min, s, n, time.UTC)
-		norm := util.NormalizeTime(date, true)
-		return (norm.Year() == 0) && (norm.Month() == 1) && (norm.Day() == 1)
+		norm := util.NormalizeTime(date)
+		return (norm.Year() == 0) && (norm.Month() == 1) && (norm.Day() == 1) && (norm.Location() == util.Tz)
 	}
 
 	err := quick.Check(testf, &conf)

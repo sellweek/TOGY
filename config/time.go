@@ -7,14 +7,14 @@ import (
 
 //Tests if submitted time is during an overriden day.
 func (c Config) IsOverridenDay(t time.Time) bool {
-	_, ok := c.OverrideDays[util.NormalizeDate(t, false).Unix()]
+	_, ok := c.OverrideDays[util.NormalizeDate(t).Unix()]
 	return ok
 }
 
 //Tests if it should broadcast on time with timeconfig.
 func (tc TimeConfig) IsBroadcastingTime(t time.Time) bool {
-	afterOn := util.NormalizeTime(t, false).After(tc.TurnOn)
-	beforeOff := tc.TurnOff.After(util.NormalizeTime(t, false))
+	afterOn := util.NormalizeTime(t).After(tc.TurnOn)
+	beforeOff := tc.TurnOff.After(util.NormalizeTime(t))
 	return afterOn && beforeOff
 }
 
@@ -27,7 +27,7 @@ func (c Config) BroadcastingTime(t time.Time) bool {
 		return false
 	}
 	if c.IsOverridenDay(t) {
-		return c.OverrideDays[util.NormalizeDate(t, false).Unix()].IsBroadcastingTime(t)
+		return c.OverrideDays[util.NormalizeDate(t).Unix()].IsBroadcastingTime(t)
 	}
 	if c.Weekends {
 		return c.StandardTimeSettings.IsBroadcastingTime(t)
