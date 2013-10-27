@@ -38,7 +38,7 @@ func (c Config) BroadcastingTime(t time.Time) bool {
 
 //Returns whether there should be broadcast at the current time.
 func (c Config) Broadcast() bool {
-	now := time.Now()
+	now := util.NormalizeTime(time.Now())
 	return c.BroadcastingTime(now)
 }
 

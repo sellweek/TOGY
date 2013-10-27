@@ -1,5 +1,5 @@
 {
-	"Name": "Testing-iMac",
+	"Name": "Test",
 	"CentralPath": "centralConfig.json",
 	"PowerPoint": "C:\\Program Files\\Microsoft Office 15\\root\\office15\\POWERPNT.EXE",
 	"UpdateURL": "http://localhost:8080/api",

@@ -6,7 +6,11 @@ import (
 	"time"
 )
 
-var Tz, _ = time.LoadLocation("Europe/Bratislava")
+//In reality the time zone used here doesn't matter,
+//and it shouldn't cause problems when switching to DST.
+//This is used just so the timezone used will have some
+//correlation with the local one.
+var Tz = time.Now().Location()
 
 //Returns true if the file on path a was modified later than the file on path b.
 //If an error is encountered, returns false and the error.
