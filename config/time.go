@@ -38,8 +38,8 @@ func (c Config) BroadcastingTime(t time.Time) bool {
 
 //Returns whether there should be broadcast at the current time.
 func (c Config) Broadcast() bool {
-	now := util.NormalizeTime(time.Now())
-	return c.BroadcastingTime(now)
+	now := time.Now()
+	val := c.BroadcastingTime(now)
 }
 
 func isWeekend(t time.Time) bool {
