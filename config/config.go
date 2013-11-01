@@ -119,7 +119,7 @@ func joinLocal(l localConfig, c *Config) {
 	c.Logger = logr
 	backend := logging.NewLogBackend(logOut, "", log.LstdFlags|log.Lshortfile)
 	logging.SetBackend(backend)
-	logging.SetLevel(logging.NOTICE, "TOGY")
+	logging.SetLevel(logging.DEBUG, "TOGY")
 }
 
 func joinCentral(c centralConfig, conf *Config) (err error) {

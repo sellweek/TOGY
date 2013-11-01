@@ -2,6 +2,7 @@ package manager
 
 import (
 	"github.com/sellweek/TOGY/config"
+	"os"
 	"time"
 )
 
@@ -26,11 +27,12 @@ type Manager struct {
 	broadcastErr chan error
 	//Chan used to send termination signal to schedule manager.
 	scheduleChan chan bool
-	//Chan used to signal 
+	//Chan used to signal
 	reloadSignal chan bool
 	//Chan used to send signals that the config is updated
 	//and managers should restart.
-	config *config.Config
+	config               *config.Config
+	currentPresentations []string
 }
 
 //RunBroadcast loads a local config file specified in cp,
@@ -38,13 +40,20 @@ type Manager struct {
 //handling all the updates and scheduling.
 func RunBroadcast(cp string) (err error) {
 	for {
-		var c *config.Config
+		var (
+			c   *config.Config
+			mgr *Manager
+		)
 		c, err = config.Get(cp)
 		if err != nil {
 			return
 		}
 		c.Notice("Reloading manager")
-		mgr := New(c)
+		mgr, err = New(c)
+		if err != nil {
+			return
+		}
+
 		mgr.Run()
 		c.Notice("Manager running")
 	}
@@ -62,23 +71,36 @@ func (m *Manager) Run() {
 	close(m.broadcastChan)
 }
 
-//Start starts broadcast, screen and update manager. 
+//Start starts broadcast, screen and update manager.
 func (m *Manager) Start() {
 	go broadcastManager(m)
 	st := time.Tick(time.Second * 10)
 	go scheduleManager(m, st)
-	ut := time.Tick(m.config.UpdateInterval)
-	go updateManager(m, ut)
+	//ut := time.Tick(m.config.UpdateInterval)
+	//go updateManager(m, ut)
 }
 
-//New returns a new Manager with all the chans initialized.
-func New(c *config.Config) (m *Manager) {
+//New returns a new Manager with all the chans initialized
+//and containing a list of broadcasts available in broadcast
+//folder.
+func New(c *config.Config) (m *Manager, err error) {
 	m = new(Manager)
 	m.broadcastChan = make(chan bMsg)
 	m.broadcastErr = make(chan error)
 	m.scheduleChan = make(chan bool)
 	m.reloadSignal = make(chan bool)
 	m.config = c
+	m.currentPresentations, err = getBroadcastDirs(c)
+	return
+}
+
+func getBroadcastDirs(c *config.Config) (ids []string, err error) {
+	dir, err := os.Open(c.BroadcastDir)
+	if err != nil {
+		return
+	}
+
+	ids, err = dir.Readdirnames(0)
 	return
 }
 
@@ -109,13 +131,6 @@ func (m *Manager) unblock() {
 //returning an erro, if it occurs there.
 func (m *Manager) sendAndWaitForError(msg bMsg) error {
 	m.broadcastChan <- msg
-	c := time.After(time.Second)
-	<-c
-	select {
-	case err := <-m.broadcastErr:
-		return err
-	default:
-		return nil
-	}
-	return nil
+	err := <-m.broadcastErr
+	return err
 }

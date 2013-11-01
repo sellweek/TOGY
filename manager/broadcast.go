@@ -1,6 +1,7 @@
 package manager
 
 import (
+	"fmt"
 	"github.com/sellweek/TOGY/control"
 	"github.com/sellweek/TOGY/util"
 	"os"
@@ -10,40 +11,42 @@ import (
 //turning the handler program and screen on and off.
 //It receives messages from the schedule manager
 //and starts and stops broadcast according to them.
-//All errors that occur are sent back on 
+//All errors that occur are sent back on
 //mgr.broadcastErr channel.
 //It can also be blocked, which makes it
 //wait for unblock message, throwing away all the
 //other messages.
 func broadcastManager(mgr *Manager) {
-	var presentation *control.PowerPointBroadcast
-	presentation = nil
+	var (
+		errChan  <-chan error
+		stopChan chan<- bool
+	)
 	for msg := range mgr.broadcastChan {
+		mgr.config.Debug("Recieved message: %v", msg)
 		switch msg {
 		//When broadcast manager receives a message
 		//telling it to turn the broadcast on,
 		//it starts the handler application
-		//and turns the screen on. 
+		//and turns the screen on.
 		case startBroadcast:
-			if presentation == nil {
-				pth, err := getPresentation(mgr.config.BroadcastDir)
+			if stopChan == nil {
+				stopChan, errChan = presentationRotator(mgr)
+				mgr.config.Debug("Turning screen on")
+				err := control.TurnScreenOn()
 				if err != nil {
 					mgr.broadcastErr <- err
 					continue
 				}
-				presentation = control.NewPowerPoint(mgr.config.PowerPoint, pth)
-				mgr.config.Notice("New presentation was created")
-			}
-			err := presentation.Start()
-			if err != nil {
-				mgr.broadcastErr <- err
-				continue
-			}
-			mgr.config.Debug("Turning screen on")
-			err = control.TurnScreenOn()
-			if err != nil {
-				mgr.broadcastErr <- err
-				continue
+				mgr.broadcastErr <- nil
+			} else {
+				select {
+				case err := <-errChan:
+					mgr.broadcastErr <- err
+					continue
+				default:
+					mgr.broadcastErr <- nil
+					continue
+				}
 			}
 
 		//When broadcast manager receives a message
@@ -58,17 +61,16 @@ func broadcastManager(mgr *Manager) {
 				continue
 			}
 
-			if presentation == nil {
+			if stopChan == nil {
+				mgr.broadcastErr <- nil
 				continue
 			}
-			err = presentation.Kill()
-			if err != nil {
-				mgr.broadcastErr <- err
-				continue
-			}
+			stopChan <- true
 
-			presentation = nil
+			stopChan = nil
+			errChan = nil
 			mgr.config.Notice("The presentation was stopped")
+			mgr.broadcastErr <- nil
 
 		//When broadcast manager receives a message
 		//telling it to block, it will throw away all
@@ -115,4 +117,38 @@ func getFileWithType(ft string, fns []string) string {
 		}
 	}
 	return ""
+}
+
+func presentationRotator(mgr *Manager) (chan<- bool, <-chan error) {
+	exitChan := make(chan bool)
+	errChan := make(chan error)
+	go func() {
+		mgr.config.Debug("Rotator started with presentations: %v", mgr.currentPresentations)
+		for {
+			for _, p := range mgr.currentPresentations {
+				mgr.config.Debug("Starting presentation: %s", p)
+				select {
+				case <-exitChan:
+					mgr.config.Debug("Rotator exiting")
+					return
+				default:
+					pth, err := getPresentation(fmt.Sprint(mgr.config.BroadcastDir, string(os.PathSeparator), p))
+					if err != nil {
+						mgr.config.Error("Rotator couldn't get presentation: %v", err)
+						errChan <- err
+						continue
+					}
+					presentation := control.NewPowerPoint(mgr.config.PowerPoint, pth)
+					mgr.config.Notice("New presentation was created")
+					err = presentation.Run()
+					if err != nil {
+						mgr.config.Error("Rotator couldn't start PowerPoint: %v", err)
+						errChan <- err
+						continue
+					}
+				}
+			}
+		}
+	}()
+	return exitChan, errChan
 }

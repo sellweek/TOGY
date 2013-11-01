@@ -12,7 +12,7 @@ import (
 //checking server for update info and downloading
 //updated config or broadcast.
 func updateManager(mgr *Manager, t <-chan time.Time) {
-	for {
+	/*for {
 		select {
 		case _ = <-t:
 			mgr.config.Notice("Getting update info")
@@ -43,7 +43,7 @@ func updateManager(mgr *Manager, t <-chan time.Time) {
 				return
 			}
 		}
-	}
+	}*/
 }
 
 //updateConfig downloads a new config from server and announces its
@@ -64,7 +64,7 @@ func updateConfig(mgr *Manager) error {
 //updateBroadcast downloads a new broadcast from server,
 //announces its succesful download and moves it into place.
 func updateBroadcast(mgr *Manager, ft string) error {
-	path, err := makeTempDir()
+	/*path, err := makeTempDir()
 	if err != nil {
 		return fmt.Errorf("Error while creating temporary directory: %v", err)
 	}
@@ -105,7 +105,7 @@ func updateBroadcast(mgr *Manager, ft string) error {
 		return fmt.Errorf("Error while starting new broadcast: %v", err)
 	}
 
-	_ = deleteAll(path)
+	_ = deleteAll(path)*/
 	return nil
 }
 

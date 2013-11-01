@@ -13,13 +13,14 @@ type PowerPointBroadcast struct {
 	cmd *exec.Cmd
 }
 
-//Start starts PowerPoint in presentation mode.
-func (b *PowerPointBroadcast) Start() error {
+//Start starts PowerPoint in presentation mode
+//and waits until it terminates.
+func (b *PowerPointBroadcast) Run() error {
 	if b.Status() {
 		return nil
 	}
 	cmd := exec.Command(b.powerPoint, "/s", b.path)
-	err := cmd.Start()
+	err := cmd.Run()
 	if err != nil {
 		return err
 	}
