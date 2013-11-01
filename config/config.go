@@ -38,6 +38,7 @@ type centralConfig struct {
 	OverrideOff          bool
 	Weekends             bool
 	UpdateInterval       int
+	Timestamp            int64
 }
 
 //The real configuration struct.
@@ -55,6 +56,7 @@ type Config struct {
 	CentralPath          string
 	Weekends             bool
 	BroadcastDir         string
+	Timestamp            int64
 	*logging.Logger
 }
 
@@ -148,6 +150,7 @@ func joinCentral(c centralConfig, conf *Config) (err error) {
 	conf.Weekends = c.Weekends
 	conf.OverrideOn = c.OverrideOn
 	conf.OverrideOff = c.OverrideOff
+	conf.Timestamp = c.Timestamp
 	return
 }
 
