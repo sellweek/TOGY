@@ -2,6 +2,7 @@ package updater
 
 import (
 	"archive/zip"
+	"fmt"
 	"github.com/sellweek/TOGY/config"
 	"io"
 	"net/http"
@@ -16,10 +17,27 @@ func DownloadConfig(c *config.Config, destFile string) error {
 	return downloadFile(c.UpdateURL+"/config/download?client="+c.Name, destFile)
 }
 
-//DownloadBroadcast downloads a new broadcast from the server into a 
+func DownloadBroadcasts(c *config.Config, bis []BroadcastInfo, destDir string) (err error) {
+	for _, bi := range bis {
+		dest := fmt.Sprint(destDir, string(os.PathSeparator), bi.Key)
+		err = os.Mkdir(dest, os.ModePerm)
+		if err != nil {
+			return
+		}
+
+		err = DownloadBroadcast(c, bi.Key, bi.FileType, dest)
+		if err != nil {
+			return
+		}
+
+	}
+	return
+}
+
+//DownloadBroadcast downloads a new broadcast from the server into a
 //given directory, unzipping it, if it has .zip extension.
-func DownloadBroadcast(c *config.Config, ft string, destDir string) (err error) {
-	srcUrl := c.UpdateURL + "/presentation/active/download?client=" + c.Name
+func DownloadBroadcast(c *config.Config, key, ft string, destDir string) (err error) {
+	srcUrl := fmt.Sprint(c.UpdateURL, "/presentation/", key, "/download?client=", c.Name)
 
 	if ft != "zip" {
 		err = downloadFile(srcUrl, destDir+string(os.PathSeparator)+"broadcast."+ft)
@@ -35,14 +53,19 @@ func DownloadBroadcast(c *config.Config, ft string, destDir string) (err error) 
 
 	err = unzip(destDir, tempFileName)
 
-	return
+	err = os.Remove(tempFileName)
+	if err != nil {
+		c.Notice("Couldn't remove temporary file: %v", err)
+	}
+
+	return nil
 }
 
 //ColdStart downloads central config and the newest broadcast
 //into folders specified in config, without announcing
 //their downloads.
 func ColdStart(c *config.Config) (err error) {
-	ui, err := GetInfo(c)
+	info, err := GetInfo(c)
 	if err != nil {
 		return err
 	}
@@ -50,7 +73,16 @@ func ColdStart(c *config.Config) (err error) {
 	if err != nil {
 		return err
 	}
-	err = DownloadBroadcast(c, ui.FileType, c.BroadcastDir)
+	err = DownloadBroadcasts(c, info.Broadcasts, c.BroadcastDir)
+	if err != nil {
+		return
+	}
+
+	for _, b := range info.Broadcasts {
+		//There's no problem if we don't handle errors here,
+		//because everything will work even if it's not announced to the server.
+		_ = AnnounceBroadcast(c, b.Key)
+	}
 	return
 }
 
