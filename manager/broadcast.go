@@ -65,24 +65,15 @@ func broadcastManager(mgr *Manager) {
 				mgr.broadcastErr <- nil
 				continue
 			}
+			mgr.config.Debug("Stopping rotator")
 			stopChan <- true
+			mgr.config.Debug("Rotator stopped")
 
 			stopChan = nil
 			errChan = nil
 			mgr.config.Notice("The presentation was stopped")
 			mgr.broadcastErr <- nil
 
-		//When broadcast manager receives a message
-		//telling it to block, it will throw away all
-		//messages received, unless they tell it to unblock.
-		case block:
-			mgr.config.Info("Broadcast manager blocked.")
-			for m := range mgr.broadcastChan {
-				if m == unblock {
-					mgr.config.Info("Broadcast manager unblocked.")
-					break
-				}
-			}
 		}
 	}
 	mgr.config.Notice("Broadcast manager terminating")
@@ -124,30 +115,37 @@ func presentationRotator(mgr *Manager) (chan<- bool, <-chan error) {
 	errChan := make(chan error)
 	go func() {
 		mgr.config.Debug("Rotator started with presentations: %v", mgr.currentPresentations)
-		for {
-			for _, p := range mgr.currentPresentations {
-				mgr.config.Debug("Starting presentation: %s", p)
-				select {
-				case <-exitChan:
-					mgr.config.Debug("Rotator exiting")
-					return
-				default:
-					pth, err := getPresentation(fmt.Sprint(mgr.config.BroadcastDir, string(os.PathSeparator), p))
-					if err != nil {
-						mgr.config.Error("Rotator couldn't get presentation: %v", err)
-						errChan <- err
-						continue
-					}
-					presentation := control.NewPowerPoint(mgr.config.PowerPoint, pth)
-					mgr.config.Notice("New presentation was created")
-					err = presentation.Run()
-					if err != nil {
-						mgr.config.Error("Rotator couldn't start PowerPoint: %v", err)
-						errChan <- err
-						continue
+		if len(mgr.currentPresentations) != 0 {
+			for {
+				for _, p := range mgr.currentPresentations {
+					mgr.config.Debug("Starting presentation: %s", p)
+					select {
+					case <-exitChan:
+						mgr.config.Debug("Rotator exiting")
+						return
+					default:
+						pth, err := getPresentation(fmt.Sprint(mgr.config.BroadcastDir, string(os.PathSeparator), p))
+						if err != nil {
+							mgr.config.Error("Rotator couldn't get presentation: %v", err)
+							errChan <- err
+							continue
+						}
+						presentation := control.NewPowerPoint(mgr.config.PowerPoint, pth)
+						mgr.config.Notice("New presentation was created")
+						err = presentation.Run()
+						if err != nil {
+							mgr.config.Error("Rotator couldn't start PowerPoint: %v", err)
+							errChan <- err
+							continue
+						}
 					}
 				}
 			}
+		} else {
+			mgr.config.Debug("Rotator running without any presentations")
+			<-exitChan
+			mgr.config.Debug("Rotator exiting")
+			return
 		}
 	}()
 	return exitChan, errChan

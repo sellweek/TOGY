@@ -30,9 +30,20 @@ func scheduleManager(mgr *Manager, t <-chan time.Time) {
 				mgr.config.Debug("Broadcast off")
 			}
 
-		case _ = <-mgr.scheduleChan:
-			mgr.config.Notice("Schedule manager terminating")
-			return
+		case msg := <-mgr.scheduleChan:
+			if msg == terminate {
+				mgr.config.Notice("Schedule manager terminating")
+				return
+			}
+			if msg == block {
+				mgr.config.Info("Schedule manager blocked.")
+				for m := range mgr.scheduleChan {
+					if m == unblock {
+						mgr.config.Info("Schedule manager unblocked.")
+						break
+					}
+				}
+			}
 		}
 	}
 }

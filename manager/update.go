@@ -12,7 +12,7 @@ import (
 //checking server for update info and downloading
 //updated config or broadcast.
 func updateManager(mgr *Manager, t <-chan time.Time) {
-	/*for {
+	for {
 		select {
 		case _ = <-t:
 			mgr.config.Notice("Getting update info")
@@ -21,18 +21,16 @@ func updateManager(mgr *Manager, t <-chan time.Time) {
 				mgr.config.Error("Error while downloading info: %v", err)
 				continue
 			}
-			if i.Broadcast {
-				mgr.config.Notice("Updating broadcast")
-				err = updateBroadcast(mgr, i.FileType)
-				if err != nil {
-					mgr.config.Error("Error when updating broadcast: %v", err)
-				}
-				mgr.config.Notice("Broadcast updated")
+
+			err = updateBroadcasts(mgr, i)
+			if err != nil {
+				mgr.config.Error("Error while updating broadcasts: %v", err)
+				continue
 			}
 
 			//If a new config is downloaded, a reload signal is sent
 			//and updateManager terminates.
-			if i.Config {
+			if i.Config > mgr.config.Timestamp {
 				mgr.config.Notice("Updating config")
 				err = updateConfig(mgr)
 				if err != nil {
@@ -43,7 +41,7 @@ func updateManager(mgr *Manager, t <-chan time.Time) {
 				return
 			}
 		}
-	}*/
+	}
 }
 
 //updateConfig downloads a new config from server and announces its
@@ -63,49 +61,86 @@ func updateConfig(mgr *Manager) error {
 
 //updateBroadcast downloads a new broadcast from server,
 //announces its succesful download and moves it into place.
-func updateBroadcast(mgr *Manager, ft string) error {
-	/*path, err := makeTempDir()
-	if err != nil {
-		return fmt.Errorf("Error while creating temporary directory: %v", err)
+func updateBroadcasts(mgr *Manager, inf updater.Info) (err error) {
+	addedBroadcasts := make([]updater.BroadcastInfo, 0)
+	for _, p := range inf.Broadcasts {
+		if !stringInSlice(p.Key, mgr.currentPresentations) {
+			addedBroadcasts = append(addedBroadcasts, p)
+		}
 	}
-	err = updater.DownloadBroadcast(mgr.config, ft, path)
-	if err != nil {
-		return fmt.Errorf("Error while downloading new broadcast: %v", err)
-	}
-	mgr.config.Notice("Broadcast successfully downloaded, announcing.")
+	mgr.config.Debug("Added broadcasts: %v", addedBroadcasts)
 
-	err = updater.AnnounceBroadcast(mgr.config)
-	if err != nil {
-		return fmt.Errorf("Error while announcing the download of broadcast: %v", err)
+	removedBroadcasts := make([]string, 0)
+	bKeys := make([]string, len(inf.Broadcasts))
+	for i, p := range inf.Broadcasts {
+		bKeys[i] = p.Key
 	}
 
-	err = mgr.stopBroadcast()
-	if err != nil {
-		return fmt.Errorf("Error while stopping broadcast for update: %v", err)
+	for _, p := range mgr.currentPresentations {
+		if !stringInSlice(p, bKeys) {
+			removedBroadcasts = append(removedBroadcasts, p)
+		}
 	}
+	mgr.config.Debug("Removed broadcasts: %v", removedBroadcasts)
 
 	//scheduleManager has to be blocked from interfering
 	//with us moving the broadcast into place.
 	mgr.block()
 	defer mgr.unblock()
 
-	mgr.config.Notice("Moving new broadcast into place")
-	err = deleteAll(mgr.config.BroadcastDir)
-	if err != nil {
-		return fmt.Errorf("Error while deleting old broadcast: %v", err)
+	if len(addedBroadcasts) != 0 {
+		path, err := makeTempDir()
+		if err != nil {
+			return fmt.Errorf("Error while creating temporary directory: %v", err)
+		}
+		err = updater.DownloadBroadcasts(mgr.config, addedBroadcasts, path)
+		if err != nil {
+			return fmt.Errorf("Error while downloading new broadcasts: %v", err)
+		}
+		mgr.config.Notice("Broadcasts successfully downloaded into temporary folder.")
+
+		err = mgr.stopBroadcast()
+		if err != nil {
+			return fmt.Errorf("Error while stopping broadcast for update: %v", err)
+		}
+
+		mgr.config.Notice("Moving new broadcasts into place")
+
+		err = moveFiles(path, mgr.config.BroadcastDir)
+		if err != nil {
+			return fmt.Errorf("Error while moving new broadcast into place: %v", err)
+		}
+
+		_ = deleteAll(path)
 	}
 
-	err = moveFiles(path, mgr.config.BroadcastDir)
-	if err != nil {
-		return fmt.Errorf("Error while moving new broadcast into place: %v", err)
+	if len(removedBroadcasts) != 0 {
+		err = mgr.stopBroadcast()
+		if err != nil {
+			return fmt.Errorf("Error while stopping broadcast for removal of presentations: %v", err)
+		}
+		for _, key := range removedBroadcasts {
+			rmPath := fmt.Sprint(mgr.config.BroadcastDir, string(os.PathSeparator), key)
+			mgr.config.Debug("Removing directory: %s", rmPath)
+			err = os.RemoveAll(rmPath)
+			if err != nil {
+				return fmt.Errorf("Error while removing deactivated broadcast %v: %v", key, err)
+			}
+		}
 	}
 
-	err = mgr.startBroadcast()
+	mgr.currentPresentations, err = getBroadcastDirs(mgr.config)
 	if err != nil {
-		return fmt.Errorf("Error while starting new broadcast: %v", err)
+		return fmt.Errorf("Couldn't get current broadcasts: %v", err)
 	}
 
-	_ = deleteAll(path)*/
+	for _, p := range addedBroadcasts {
+		mgr.config.Debug("Announcing broadcast %v", p.Key)
+		err = updater.AnnounceBroadcast(mgr.config, p.Key)
+		if err != nil {
+			mgr.config.Error("Error while announcing activation of broadcast %v: %v", p.Key, err)
+		}
+	}
 	return nil
 }
 
@@ -162,4 +197,13 @@ func deleteAll(dir string) (err error) {
 		}
 	}
 	return nil
+}
+
+func stringInSlice(a string, list []string) bool {
+	for _, b := range list {
+		if b == a {
+			return true
+		}
+	}
+	return false
 }

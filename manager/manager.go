@@ -11,10 +11,11 @@ const (
 	stopBroadcast
 	block
 	unblock
+	terminate
 )
 
 //bMsg is the type of messages used
-//to control the broadcast manager.
+//to control the broadcast or schedule manager.
 type bMsg int
 
 //Manager is a struct used to manage
@@ -26,7 +27,7 @@ type Manager struct {
 	//Chan used to send errors back from broadcast manager.
 	broadcastErr chan error
 	//Chan used to send termination signal to schedule manager.
-	scheduleChan chan bool
+	scheduleChan chan bMsg
 	//Chan used to signal
 	reloadSignal chan bool
 	//Chan used to send signals that the config is updated
@@ -55,7 +56,6 @@ func RunBroadcast(cp string) (err error) {
 		}
 
 		mgr.Run()
-		c.Notice("Manager running")
 	}
 	return
 }
@@ -66,7 +66,7 @@ func RunBroadcast(cp string) (err error) {
 func (m *Manager) Run() {
 	m.Start()
 	<-m.reloadSignal
-	m.scheduleChan <- true
+	m.scheduleChan <- terminate
 	m.stopBroadcast()
 	close(m.broadcastChan)
 }
@@ -76,8 +76,8 @@ func (m *Manager) Start() {
 	go broadcastManager(m)
 	st := time.Tick(time.Second * 10)
 	go scheduleManager(m, st)
-	//ut := time.Tick(m.config.UpdateInterval)
-	//go updateManager(m, ut)
+	ut := time.Tick(m.config.UpdateInterval)
+	go updateManager(m, ut)
 }
 
 //New returns a new Manager with all the chans initialized
@@ -87,7 +87,7 @@ func New(c *config.Config) (m *Manager, err error) {
 	m = new(Manager)
 	m.broadcastChan = make(chan bMsg)
 	m.broadcastErr = make(chan error)
-	m.scheduleChan = make(chan bool)
+	m.scheduleChan = make(chan bMsg)
 	m.reloadSignal = make(chan bool)
 	m.config = c
 	m.currentPresentations, err = getBroadcastDirs(c)
@@ -114,17 +114,15 @@ func (m *Manager) stopBroadcast() error {
 	return m.sendAndWaitForError(stopBroadcast)
 }
 
-//Blocks the broadcast manager from
-//starting or stopping the handler application,
-//turning the screen on and off.
+//Blocks the schedule manager from
+//sending messages
 func (m *Manager) block() {
-	m.broadcastChan <- block
+	m.scheduleChan <- block
 }
 
-//Allows broadcast manager to start or stop
-//the handler application and turn the screen on and off.
+//Allows schedule manager to send messages
 func (m *Manager) unblock() {
-	m.broadcastChan <- unblock
+	m.scheduleChan <- unblock
 }
 
 //Sends a message to the broadcast manager,
