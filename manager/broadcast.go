@@ -54,24 +54,22 @@ func broadcastManager(mgr *Manager) {
 		//it terminates the handler application
 		//and turns the screen off.
 		case stopBroadcast:
+			if stopChan != nil {
+				mgr.broadcastErr <- nil
+				mgr.config.Debug("Stopping rotator")
+				stopChan <- true
+				mgr.config.Debug("Rotator stopped")
+
+				stopChan = nil
+				errChan = nil
+				mgr.config.Notice("The presentation was stopped")
+			}
 			mgr.config.Debug("Turning screen off")
 			err := control.TurnScreenOff()
 			if err != nil {
 				mgr.broadcastErr <- err
 				continue
 			}
-
-			if stopChan == nil {
-				mgr.broadcastErr <- nil
-				continue
-			}
-			mgr.config.Debug("Stopping rotator")
-			stopChan <- true
-			mgr.config.Debug("Rotator stopped")
-
-			stopChan = nil
-			errChan = nil
-			mgr.config.Notice("The presentation was stopped")
 			mgr.broadcastErr <- nil
 
 		}
@@ -96,7 +94,12 @@ func getPresentation(dir string) (string, error) {
 	if fn == "" {
 		fn = getFileWithType("ppt", files)
 	}
-	return dir + string(os.PathSeparator) + fn, nil
+	if fn != "" {
+		return dir + string(os.PathSeparator) + fn, nil
+	} else {
+		return "", fmt.Errorf("Couldn't find PowerPoint file in folder %s.", dir)
+	}
+
 }
 
 //Searches a list of file names for the file with
@@ -118,16 +121,15 @@ func presentationRotator(mgr *Manager) (chan<- bool, <-chan error) {
 		if len(mgr.currentPresentations) != 0 {
 			for {
 				for _, p := range mgr.currentPresentations {
-					mgr.config.Debug("Starting presentation: %s", p)
 					select {
 					case <-exitChan:
 						mgr.config.Debug("Rotator exiting")
 						return
 					default:
+						mgr.config.Debug("Starting presentation: %s", p)
 						pth, err := getPresentation(fmt.Sprint(mgr.config.BroadcastDir, string(os.PathSeparator), p))
 						if err != nil {
 							mgr.config.Error("Rotator couldn't get presentation: %v", err)
-							errChan <- err
 							continue
 						}
 						presentation := control.NewPowerPoint(mgr.config.PowerPoint, pth)
