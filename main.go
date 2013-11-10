@@ -28,7 +28,7 @@ func main() {
 		return
 	}
 
-	err := manager.RunBroadcast(*configPath)
+	err := manager.RunContinuosly(*configPath)
 	if err != nil {
 		panic(err)
 	}
