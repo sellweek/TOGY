@@ -93,17 +93,17 @@ func updateBroadcasts(mgr *Manager, inf updater.Info) (err error) {
 	if len(addedBroadcasts) != 0 {
 		path, err := makeTempDir()
 		if err != nil {
-			return fmt.Errorf("Error while creating temporary directory: %v", err)
+			mgr.config.Error("Error while creating temporary directory: %v", err)
 		}
 		err = updater.DownloadBroadcasts(mgr.config, addedBroadcasts, path)
 		if err != nil {
-			return fmt.Errorf("Error while downloading new broadcasts: %v", err)
+			mgr.config.Error("Error while downloading new broadcasts: %v", err)
 		}
 		mgr.config.Notice("Broadcasts successfully downloaded, moving into broadcast folder.")
 
 		err = moveFiles(path, mgr.config.BroadcastDir)
 		if err != nil {
-			return fmt.Errorf("Error while moving new broadcast into place: %v", err)
+			mgr.config.Error("Error while moving new broadcast into place: %v", err)
 		}
 
 		_ = deleteAll(path)
@@ -115,10 +115,12 @@ func updateBroadcasts(mgr *Manager, inf updater.Info) (err error) {
 			mgr.config.Debug("Removing directory: %s", rmPath)
 			err = os.RemoveAll(rmPath)
 			if err != nil {
-				return fmt.Errorf("Error while removing deactivated broadcast %v: %v", key, err)
+				mgr.config.Error("Error while removing deactivated broadcast %v: %v", key, err)
 			}
 		}
 	}
+
+	err = nil
 
 	if wasUpdated {
 		mgr.activePresentations, err = getBroadcastDirs(mgr.config)
