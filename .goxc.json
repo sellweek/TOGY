@@ -11,6 +11,6 @@
 		"Exclude": "*.ppt",
 		"Exclude": "*.pptx"
 	},
-	"PackageVersion": "1.4.2",
+	"PackageVersion": "2.0",
 	"FormatVersion": "0.6"
 }
