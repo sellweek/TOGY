@@ -21,7 +21,7 @@ type Info struct {
 //GetInfo returns an Info struct with current
 //information from server.
 func GetInfo(c *config.Config) (i Info, err error) {
-	r, err := downloadInfo(c.UpdateURL + "/status")
+	r, err := downloadInfo(c.UpdateURL + "/status?client=" + c.Name)
 	if err != nil {
 		return
 	}
