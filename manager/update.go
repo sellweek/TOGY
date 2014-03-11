@@ -131,9 +131,17 @@ func updateBroadcasts(mgr *Manager, inf updater.Info) (err error) {
 
 	for _, p := range addedBroadcasts {
 		mgr.config.Debug("Announcing broadcast %v", p.Key)
-		err = updater.AnnounceBroadcast(mgr.config, p.Key)
+		err = updater.AnnounceActivation(mgr.config, p.Key)
 		if err != nil {
 			mgr.config.Error("Error while announcing activation of broadcast %v: %v", p.Key, err)
+		}
+	}
+
+	for _, k := range removedBroadcasts {
+		mgr.config.Debug("Announcing broadcast %v", k)
+		err = updater.AnnounceDeactivation(mgr.config, k)
+		if err != nil {
+			mgr.config.Error("Error while announcing activation of broadcast %v: %v", k, err)
 		}
 	}
 	return nil

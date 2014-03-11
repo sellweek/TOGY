@@ -81,7 +81,7 @@ func ColdStart(c *config.Config) (err error) {
 	for _, b := range info.Broadcasts {
 		//There's no problem if we don't handle errors here,
 		//because everything will work even if it's not announced to the server.
-		_ = AnnounceBroadcast(c, b.Key)
+		_ = AnnounceActivation(c, b.Key)
 	}
 	return
 }

@@ -47,8 +47,24 @@ func parseInfo(r io.Reader) (i Info, err error) {
 
 //AnnounceBroadcast announces to the server that
 //the broadcast has been succesfuly activated.
-func AnnounceBroadcast(c *config.Config, key string) error {
-	url := fmt.Sprint(c.UpdateURL, "/presentation/", key, "/downloadComplete?client=", c.Name)
+func AnnounceActivation(c *config.Config, key string) error {
+	return announceBroadcast(true, c, key)
+}
+
+//AnnounceBroadcast announces to the server that
+//the broadcast has been succesfuly deactivated.
+func AnnounceDeactivation(c *config.Config, key string) error {
+	return announceBroadcast(false, c, key)
+}
+
+func announceBroadcast(action bool, c *config.Config, key string) error {
+	var path string
+	if action {
+		path = "activated"
+	} else {
+		path = "deactivated"
+	}
+	url := fmt.Sprint(c.UpdateURL, "/presentation/", key, "/", path, "?client=", c.Name)
 	_, err := http.Get(url)
 	return err
 }
