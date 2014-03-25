@@ -9,40 +9,41 @@ import (
 
 func startRotator(mgr *Manager) chan<- bool {
 	exitChan := make(chan bool)
-	go func() {
-		mgr.config.Debug("Rotator started with presentations: %v", mgr.activePresentations)
-		if len(mgr.activePresentations) != 0 {
-			for {
-				for _, p := range mgr.activePresentations {
-					select {
-					case <-exitChan:
-						mgr.config.Debug("Rotator exiting")
-						return
-					default:
-						mgr.config.Debug("Starting presentation: %s", p)
-						pth, err := getPresentation(fmt.Sprint(mgr.config.BroadcastDir, string(os.PathSeparator), p))
-						if err != nil {
-							mgr.config.Error("Rotator couldn't get presentation: %v", err)
-							continue
-						}
-						presentation := control.NewPowerPoint(mgr.config.PowerPoint, pth)
-						mgr.config.Notice("New presentation was created")
-						err = presentation.Run()
-						if err != nil {
-							mgr.config.Error("Rotator couldn't start PowerPoint: %v", err)
-							continue
-						}
+	go rotator()
+	return exitChan
+}
+
+func rotator() {
+	mgr.config.Debug("Rotator started with presentations: %v", mgr.activePresentations)
+	if len(mgr.activePresentations) != 0 {
+		for {
+			for _, p := range mgr.activePresentations {
+				select {
+				case <-exitChan:
+					mgr.config.Debug("Rotator exiting")
+					return
+				default:
+					mgr.config.Debug("Starting presentation: %s", p)
+					pth, err := getPresentation(fmt.Sprint(mgr.config.BroadcastDir, string(os.PathSeparator), p))
+					if err != nil {
+						mgr.config.Error("Rotator couldn't get presentation: %v", err)
+						continue
+					}
+					presentation := control.NewPowerPoint(mgr.config.PowerPoint, pth)
+					mgr.config.Notice("New presentation was created")
+					err = presentation.Run()
+					if err != nil {
+						mgr.config.Error("Rotator couldn't start PowerPoint: %v", err)
+						continue
 					}
 				}
 			}
-		} else {
-			mgr.config.Debug("Rotator running without any presentations")
-			<-exitChan
-			mgr.config.Debug("Rotator exiting")
-			return
 		}
-	}()
-	return exitChan
+	} else {
+		mgr.config.Debug("Rotator running without any presentations")
+		<-exitChan
+		mgr.config.Debug("Rotator exiting")
+	}
 }
 
 //getPresentation searches the given directory
@@ -64,9 +65,8 @@ func getPresentation(dir string) (string, error) {
 	}
 	if fn != "" {
 		return dir + string(os.PathSeparator) + fn, nil
-	} else {
-		return "", fmt.Errorf("Couldn't find PowerPoint file in folder %s.", dir)
 	}
+	return "", fmt.Errorf("Couldn't find PowerPoint file in folder %s.", dir)
 
 }
 

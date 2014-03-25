@@ -12,7 +12,7 @@ import (
 //correlation with the local one.
 var Tz = time.Now().Location()
 
-//Returns true if the file on path a was modified later than the file on path b.
+//IsNewer returns true if the file on path a was modified later than the file on path b.
 //If an error is encountered, returns false and the error.
 func IsNewer(a, b string) (bool, error) {
 	fia, err := os.Stat(a)
@@ -42,6 +42,8 @@ func NormalizeTime(t time.Time) time.Time {
 	return time.Date(0, 1, 1, t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), Tz)
 }
 
+//GetFileType returns the file type of the file at given path,
+//as indicated by its extension.
 func GetFileType(filename string) string {
 	parts := strings.Split(filename, ".")
 	if len(parts) < 2 {

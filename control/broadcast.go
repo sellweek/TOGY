@@ -1,11 +1,13 @@
 package control
 
-//Interface Broadcast specifies a broadcast file
+//Broadcast specifies a broadcast file
 //with a handler application.
 type Broadcast interface {
-	//Start function instructs handler application to
-	//start playing the broadcast.
-	Start() error
+	//Run instructs handler application to
+	//play the broadcast.
+	//This function should not return until the
+	//broadcast has ended.
+	Run() error
 	//Kill kills the handler application
 	//stopping the broadcast.
 	Kill() error

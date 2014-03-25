@@ -17,6 +17,8 @@ func DownloadConfig(c *config.Config, destFile string) error {
 	return downloadFile(c.UpdateURL+"/config/download?client="+c.Name, destFile)
 }
 
+//DownloadBroadcasts downloads all the broadcasts present in bis into destDir, putting them
+//into directories named after the IDs of the respective broadcasts.
 func DownloadBroadcasts(c *config.Config, bis []BroadcastInfo, destDir string) (err error) {
 	for _, bi := range bis {
 		dest := fmt.Sprint(destDir, string(os.PathSeparator), bi.Key)
@@ -37,16 +39,16 @@ func DownloadBroadcasts(c *config.Config, bis []BroadcastInfo, destDir string) (
 //DownloadBroadcast downloads a new broadcast from the server into a
 //given directory, unzipping it, if it has .zip extension.
 func DownloadBroadcast(c *config.Config, key, ft string, destDir string) (err error) {
-	srcUrl := fmt.Sprint(c.UpdateURL, "/presentation/", key, "/download?client=", c.Name)
+	srcURL := fmt.Sprint(c.UpdateURL, "/presentation/", key, "/download?client=", c.Name)
 
 	if ft != "zip" {
-		err = downloadFile(srcUrl, destDir+string(os.PathSeparator)+"broadcast."+ft)
+		err = downloadFile(srcURL, destDir+string(os.PathSeparator)+"broadcast."+ft)
 		return
 	}
 
 	tempFileName := os.TempDir() + string(os.PathSeparator) + "unzip-" + strconv.Itoa(int(time.Now().Unix())) + ".zip"
 
-	err = downloadFile(srcUrl, tempFileName)
+	err = downloadFile(srcURL, tempFileName)
 	if err != nil {
 		return
 	}

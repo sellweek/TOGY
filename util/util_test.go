@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-var conf quick.Config = quick.Config{
+var conf = quick.Config{
 	Values: values,
 }
 

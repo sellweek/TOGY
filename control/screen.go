@@ -4,12 +4,12 @@ import (
 	"os/exec"
 )
 
-//Turns computer's screen on
+//TurnScreenOn turns computer's screen on
 func TurnScreenOn() error {
 	return setScreenState("on")
 }
 
-//Turns computer's screen off
+//TurnScreenOff turns computer's screen off
 func TurnScreenOff() error {
 	return setScreenState("off")
 }

@@ -41,7 +41,7 @@ type centralConfig struct {
 	Timestamp            int64
 }
 
-//The real configuration struct.
+//Config is the real configuration struct.
 type Config struct {
 	Presentation         string
 	UpdatePath           string
@@ -60,13 +60,13 @@ type Config struct {
 	*logging.Logger
 }
 
-//Struct representing time when the TV should be running.
+//TimeConfig represents time when the TV should be running.
 type TimeConfig struct {
 	TurnOn  time.Time
 	TurnOff time.Time
 }
 
-//Loads configuration file from the specified path.
+//getLocal loads configuration file from the specified path.
 func getLocal(path string) (l localConfig, err error) {
 	err = getJSONFile(path, &l)
 	return
@@ -77,6 +77,8 @@ func (l localConfig) GetCentral() (c centralConfig, err error) {
 	return
 }
 
+//Get loads local config from given path and then loads central config
+//pointed to by the local one.
 func Get(path string) (conf *Config, err error) {
 	l, err := getLocal(path)
 	if err != nil {
@@ -90,6 +92,7 @@ func Get(path string) (conf *Config, err error) {
 	return
 }
 
+//ColdStart connects to server and (re)downloads the broadcasts and cetral config
 func ColdStart(path string) (conf *Config, err error) {
 	l, err := getLocal(path)
 	if err != nil {
@@ -154,7 +157,7 @@ func joinCentral(c centralConfig, conf *Config) (err error) {
 	return
 }
 
-//Converts jsonConfig to Config.
+//joinConfigs converts jsonConfig to Config.
 func joinConfigs(l localConfig, c centralConfig) (conf *Config, err error) {
 	conf = new(Config)
 	joinLocal(l, conf)
@@ -162,7 +165,7 @@ func joinConfigs(l localConfig, c centralConfig) (conf *Config, err error) {
 	return
 }
 
-//Converts map of strings to strings (formatted as time) to a TimeConfig struct.
+//makeTimeConfig converts map of strings to strings (formatted as time) to a TimeConfig struct.
 func makeTimeConfig(times map[string]string) (tc TimeConfig, err error) {
 	on, err := time.Parse(timeFormat, times["TurnOn"])
 	if err != nil {
@@ -180,6 +183,7 @@ func makeTimeConfig(times map[string]string) (tc TimeConfig, err error) {
 	return
 }
 
+//getJSONFile reads the file at given path and unmarshals it.
 func getJSONFile(path string, d interface{}) (err error) {
 	data, err := ioutil.ReadFile(path)
 	if err != nil {

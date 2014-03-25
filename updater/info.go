@@ -8,11 +8,14 @@ import (
 	"net/http"
 )
 
+//BroadcastInfo represents the information about a broadcast
+//that the server sends as part of a call to /api/status.
 type BroadcastInfo struct {
 	Key      string
 	FileType string
 }
 
+//Info is a parsed response from /api/status.
 type Info struct {
 	Broadcasts []BroadcastInfo
 	Config     int64
@@ -45,13 +48,13 @@ func parseInfo(r io.Reader) (i Info, err error) {
 	return
 }
 
-//AnnounceBroadcast announces to the server that
+//AnnounceActivation announces to the server that
 //the broadcast has been succesfuly activated.
 func AnnounceActivation(c *config.Config, key string) error {
 	return announceBroadcast(true, c, key)
 }
 
-//AnnounceBroadcast announces to the server that
+//AnnounceDeactivation announces to the server that
 //the broadcast has been succesfuly deactivated.
 func AnnounceDeactivation(c *config.Config, key string) error {
 	return announceBroadcast(false, c, key)
@@ -69,7 +72,7 @@ func announceBroadcast(action bool, c *config.Config, key string) error {
 	return err
 }
 
-//AnnounceBroadcast announces to the server that
+//AnnounceConfig announces to the server that
 //the config has been succesfuly downloaded.
 func AnnounceConfig(c *config.Config) error {
 	url := c.UpdateURL + "/config/downloadComplete?client=" + c.Name
